@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>使用 ceph-deploy 部署 Ceph 集群 | S1eke&#39;s Blog | I&#39;m curious.</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="Linux,Ceph">
+    <meta name="description" content="部署 Ceph 存储集群前置条件 管理节点下需要将所有节点对应的主机名和 IP 写入 hosts 方便批量操作（所有节点需要用不同的主机名） 所有节点配置免密登录方便管理节点使用 ceph-deploy 部署(用户需要有sudo权限，并且是NOPASSWD)  重置环境（仅在原环境上操作需要使用）该操作需要在集群的管理节点的 ceph-deploy 目录下操作。  删除所有节点的ceph软件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 ceph-deploy 部署 Ceph 集群">
+<meta property="og:url" content="https://blog.jugg.xyz/2020/07/02/ops/Ceph-Deploy/index.html">
+<meta property="og:site_name" content="S1eke&#39;s Blog">
+<meta property="og:description" content="部署 Ceph 存储集群前置条件 管理节点下需要将所有节点对应的主机名和 IP 写入 hosts 方便批量操作（所有节点需要用不同的主机名） 所有节点配置免密登录方便管理节点使用 ceph-deploy 部署(用户需要有sudo权限，并且是NOPASSWD)  重置环境（仅在原环境上操作需要使用）该操作需要在集群的管理节点的 ceph-deploy 目录下操作。  删除所有节点的ceph软件">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-07-02T18:16:33.000Z">
+<meta property="article:modified_time" content="2024-03-11T18:14:54.495Z">
+<meta property="article:author" content="Sean Fang">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Ceph">
+<meta name="twitter:card" content="summary">
+    
+        <link rel="alternate" type="application/atom+xml" title="S1eke&#39;s Blog" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/img/favicon.png">
+    <link rel="stylesheet" href="/css/style.css?v=1.7.2">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.webp">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Sean Fang</h5>
+          <a href="mailto:silence.boy@live.cn" title="silence.boy@live.cn" class="mail">silence.boy@live.cn</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                归档
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                分类
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/Timeline"  >
+                <i class="icon icon-lg icon-pagelines"></i>
+                时间线
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/s1eke" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">使用 ceph-deploy 部署 Ceph 集群</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">使用 ceph-deploy 部署 Ceph 集群</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-07-02T18:16:33.000Z" itemprop="datePublished" class="page-time">
+  2020-07-03
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E8%BF%90%E7%BB%B4/">运维</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#%E9%83%A8%E7%BD%B2-Ceph-%E5%AD%98%E5%82%A8%E9%9B%86%E7%BE%A4"><span class="post-toc-text">部署 Ceph 存储集群</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E5%89%8D%E7%BD%AE%E6%9D%A1%E4%BB%B6"><span class="post-toc-text">前置条件</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E9%87%8D%E7%BD%AE%E7%8E%AF%E5%A2%83%EF%BC%88%E4%BB%85%E5%9C%A8%E5%8E%9F%E7%8E%AF%E5%A2%83%E4%B8%8A%E6%93%8D%E4%BD%9C%E9%9C%80%E8%A6%81%E4%BD%BF%E7%94%A8%EF%BC%89"><span class="post-toc-text">重置环境（仅在原环境上操作需要使用）</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2%EF%BC%88ceph-deploy%EF%BC%89"><span class="post-toc-text">自动部署（ceph-deploy）</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E5%AE%89%E8%A3%85-ceph-deploy"><span class="post-toc-text">安装 ceph-deploy</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E5%AD%98%E5%82%A8%E9%9B%86%E7%BE%A4"><span class="post-toc-text">存储集群</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#%E5%88%9B%E5%BB%BA%E9%9B%86%E7%BE%A4"><span class="post-toc-text">创建集群</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="post-toc-text">配置文件</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#%E4%B8%BA%E6%89%80%E6%9C%89%E8%8A%82%E7%82%B9%E5%AE%89%E8%A3%85-Ceph"><span class="post-toc-text">为所有节点安装 Ceph</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#%E9%85%8D%E7%BD%AE%E5%88%9D%E5%A7%8B-monitor-s-%E3%80%81%E5%B9%B6%E6%94%B6%E9%9B%86%E6%89%80%E6%9C%89%E5%AF%86%E9%92%A5"><span class="post-toc-text">配置初始 monitor(s)、并收集所有密钥</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E5%88%9B%E5%BB%BA%E9%9B%86%E7%BE%A4-1"><span class="post-toc-text">创建集群</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#%E5%88%86%E5%8F%91%E7%AE%A1%E7%90%86%E8%8A%82%E7%82%B9%E7%9A%84%E9%85%8D%E7%BD%AE%E4%BB%A5%E5%8F%8A%E5%AF%86%E9%92%A5"><span class="post-toc-text">分发管理节点的配置以及密钥</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#%E4%B8%BA%E7%9B%91%E6%8E%A7%E8%8A%82%E7%82%B9%E9%83%A8%E7%BD%B2%E7%AE%A1%E7%90%86%E5%99%A8%E5%AE%88%E6%8A%A4%E7%A8%8B%E5%BA%8F"><span class="post-toc-text">为监控节点部署管理器守护程序</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#%E5%88%9B%E5%BB%BA-OSD"><span class="post-toc-text">创建 OSD</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E5%88%9B%E5%BB%BA-Cephfs"><span class="post-toc-text">创建 Cephfs</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E5%88%9B%E5%BB%BA-mds-%E8%8A%82%E7%82%B9"><span class="post-toc-text">创建 mds 节点</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E5%88%9B%E5%BB%BA-pool"><span class="post-toc-text">创建 pool</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E5%88%9B%E5%BB%BA-cephfs"><span class="post-toc-text">创建 cephfs</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E6%8C%82%E8%BD%BD-cephfs"><span class="post-toc-text">挂载 cephfs</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E5%AE%9E%E6%96%BD%E4%B8%AD%E9%81%87%E5%88%B0%E7%9A%84%E5%85%B6%E4%BB%96%E9%97%AE%E9%A2%98"><span class="post-toc-text">实施中遇到的其他问题</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-ops/Ceph-Deploy"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">使用 ceph-deploy 部署 Ceph 集群</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-07-03 02:16:33" datetime="2020-07-02T18:16:33.000Z"  itemprop="datePublished">2020-07-03</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E8%BF%90%E7%BB%B4/">运维</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h1 id="部署-Ceph-存储集群"><a href="#部署-Ceph-存储集群" class="headerlink" title="部署 Ceph 存储集群"></a>部署 Ceph 存储集群</h1><h2 id="前置条件"><a href="#前置条件" class="headerlink" title="前置条件"></a>前置条件</h2><ol>
+<li>管理节点下需要将所有节点对应的主机名和 IP 写入 hosts 方便批量操作（所有节点需要用不同的主机名）</li>
+<li>所有节点配置免密登录方便管理节点使用 ceph-deploy 部署(用户需要有sudo权限，并且是NOPASSWD)</li>
+</ol>
+<h2 id="重置环境（仅在原环境上操作需要使用）"><a href="#重置环境（仅在原环境上操作需要使用）" class="headerlink" title="重置环境（仅在原环境上操作需要使用）"></a>重置环境（仅在原环境上操作需要使用）</h2><p>该操作需要在集群的管理节点的 ceph-deploy 目录下操作。</p>
+<ol>
+<li><p>删除所有节点的ceph软件 </p>
+<pre><code> $ ceph-deploy purge &#123;ceph-node&#125; [&#123;ceph-node&#125;]
+</code></pre>
+</li>
+<li><p>删除所有节点的ceph软件数据</p>
+<pre><code> $ ceph-deploy purgedata &#123;ceph-node&#125; [&#123;ceph-node&#125;]
+</code></pre>
+</li>
+<li><p>删除所有节点的keys</p>
+<pre><code> $ ceph-deploy forgetkeys
+</code></pre>
+</li>
+<li><p>删除ceph配置文件</p>
+<pre><code> $ rm ceph.*
+</code></pre>
+</li>
+</ol>
+<h2 id="自动部署（ceph-deploy）"><a href="#自动部署（ceph-deploy）" class="headerlink" title="自动部署（ceph-deploy）"></a>自动部署（ceph-deploy）</h2><h3 id="安装-ceph-deploy"><a href="#安装-ceph-deploy" class="headerlink" title="安装 ceph-deploy"></a>安装 ceph-deploy</h3><pre><code># pip install ceph-deploy
+</code></pre>
+<hr>
+<h3 id="存储集群"><a href="#存储集群" class="headerlink" title="存储集群"></a>存储集群</h3><p>由于官方的源再国内访问所以需要使用第国内供的软件源，通过配置环境变量使用 aliyun 提供的 ceph-mimic 版本的仓库。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">export</span> CEPH_DEPLOY_REPO_URL=https://mirrors.aliyun.com/ceph/debian-mimic</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="创建集群"><a href="#创建集群" class="headerlink" title="创建集群"></a>创建集群</h4><p>先在管理节点上创建一个目录，用于保存 ceph-deploy 生成的配置文件和密钥对。</p>
+<pre><code># mkdir my-cluster
+# cd my-cluster
+</code></pre>
+<p>然后开始创建监控节点：</p>
+<pre><code># ceph-deploy new 监控节点主机名
+</code></pre>
+<p>这里需要把所有设备配置好免密登录，以及把所有设备的主机名和IP的对应关系写入管理节点的 hosts ，防止网络发现没有生效。另外因为 ceph-deploy 是直接调用 ssh 远程操作节点，而且会使用 sudo ，而且不支持 root 登录（官方的口径是 root 不支持 sudo ，但是实际上是可以用的。），所以要配置好用户的 sudo 免密操作。</p>
+<h4 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h4><p>ceph 自带的容灾配置，默认是保存三份副本，可以把 <code>osd pool default size = 3</code> 写入 Ceph 配置文件的 <code>[global]</code> 段下。更改为其他数量。</p>
+<p>另外如果你有多个网卡，也可以可以把 public network 写入 Ceph 配置文件的 <code>[global]</code> 段下。</p>
+<p>以下是我的配置文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[global]</span><br><span class="line">fsid = aa7852b8-dd0b-40d4-a2f4-bd1f38c6dc69</span><br><span class="line">mon_initial_members = node3, node4</span><br><span class="line">mon_host = 192.168.1.3,192.168.1.4</span><br><span class="line">auth_cluster_required = cephx</span><br><span class="line">auth_service_required = cephx</span><br><span class="line">auth_client_required = cephx</span><br><span class="line">osd pool default pg num = 4096</span><br><span class="line">osd pool default pgp num = 4096</span><br><span class="line">osd pool default size = 3</span><br><span class="line">mon_allow_pool_delete = true</span><br><span class="line">mon clock drift allowed = 0.1</span><br><span class="line">mon data avail warn = 10</span><br><span class="line">osd pool default min size = 1</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="为所有节点安装-Ceph"><a href="#为所有节点安装-Ceph" class="headerlink" title="为所有节点安装 Ceph"></a>为所有节点安装 Ceph</h4><pre><code># ceph-deploy install 所有节点主机名（包括管理节点）
+</code></pre>
+<h4 id="配置初始-monitor-s-、并收集所有密钥"><a href="#配置初始-monitor-s-、并收集所有密钥" class="headerlink" title="配置初始 monitor(s)、并收集所有密钥"></a>配置初始 monitor(s)、并收集所有密钥</h4><pre><code># ceph-deploy mon create-initial
+</code></pre>
+<p>如有报错，请检查管理节点的 &#x2F;etc&#x2F;hosts、~&#x2F;.ssh&#x2F;config 里的所有主机名和 IP 与监控节点的主机名和 IP 名一致。另外还有多个节点</p>
+<hr>
+<h3 id="创建集群-1"><a href="#创建集群-1" class="headerlink" title="创建集群"></a>创建集群</h3><h4 id="分发管理节点的配置以及密钥"><a href="#分发管理节点的配置以及密钥" class="headerlink" title="分发管理节点的配置以及密钥"></a>分发管理节点的配置以及密钥</h4><pre><code># ceph-deploy admin  所有节点名
+</code></pre>
+<h4 id="为监控节点部署管理器守护程序"><a href="#为监控节点部署管理器守护程序" class="headerlink" title="为监控节点部署管理器守护程序"></a>为监控节点部署管理器守护程序</h4><pre><code># ceph-deploy mgr create 所有监控节点
+</code></pre>
+<h4 id="创建-OSD"><a href="#创建-OSD" class="headerlink" title="创建 OSD"></a>创建 OSD</h4><pre><code># ceph-deploy osd create --data &#123;device&#125; &#123;ceph-node&#125;
+
+示例：ceph-deploy osd create --data /dev/sdb node30
+</code></pre>
+<p>OSD 创建完毕后再检查一些集群的健康情况(当使用ceph时需要使用管理员权限)：</p>
+<pre><code># ceph health
+</code></pre>
+<p>也可以用 <code>ceph -s</code> 查看集群的详细信息。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">vm@Lotus-Master ~/my-cluster % sudo ceph -s</span><br><span class="line">  cluster:</span><br><span class="line">    id:     8d24cae1-07a9-4c3c-a74c-d0b56e4ad243</span><br><span class="line">    health: HEALTH_OK</span><br><span class="line"></span><br><span class="line">  services:</span><br><span class="line">    mon: 2 daemons, quorum node3,node4 (age 2m)</span><br><span class="line">    mgr: node7(active, since 43m), standbys: node8, node9, node10, node11, node12, node15, node16, node6, node14, node18, Lotus-Master, node3, node5, node4</span><br><span class="line">    osd: 14 osds: 14 up (since 2m), 14 in (since 15m)</span><br><span class="line"></span><br><span class="line">  data:</span><br><span class="line">    pools:   0 pools, 0 pgs</span><br><span class="line">    objects: 0 objects, 0 B</span><br><span class="line">    usage:   14 GiB used, 114 TiB / 114 TiB avail</span><br><span class="line">    pgs:</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="创建-Cephfs"><a href="#创建-Cephfs" class="headerlink" title="创建 Cephfs"></a>创建 Cephfs</h2><h3 id="创建-mds-节点"><a href="#创建-mds-节点" class="headerlink" title="创建 mds 节点"></a>创建 mds 节点</h3><pre><code># ceph-deploy mds create &#123;ceph-node&#125;
+</code></pre>
+<p>CephFS 中的所有元数据操作都通过 mds 进行，因此至少需要一台 mds 节点。为了防止单点故障，在这里可以配置多个mds 服务器。默认的</p>
+<h3 id="创建-pool"><a href="#创建-pool" class="headerlink" title="创建 pool"></a>创建 pool</h3><pre><code># ceph osd pool create cephfs_data 2048
+# ceph osd pool create cephfs_meta 512
+</code></pre>
+<p>创建了一个名为 cephfs_data 和一个名为 cephfs_meta 的 pool 。关于 pg 数量的配置公式如下。当使用公式计算时，pg 数一定要是贴近计算值的2的指数值。譬如有两百个 OSD ，两个 pool ，三个副本，则计算值为200*100&#x2F;2&#x2F;3&#x3D;4000，pg 值应设置为最接近 4000 的 2 的指数值 4096。其中 cephfs 的 data pool 和 metadata pool 的 pg 数按 <a target="_blank" rel="noopener" href="http://lists.ceph.com/pipermail/ceph-users-ceph.com/2017-March/016965.html">ceph官方邮件</a> 讨论中来说，建议是 4：1 的比例。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">                         (OSDs * 100)</span><br><span class="line">Total PGs =  ---------------------------------------</span><br><span class="line">              (pool count) * (max replication count)</span><br></pre></td></tr></table></figure>
+
+<p>另外可通过 <code>sudo ceph osd lspools</code> 来查看已有的 pool，如果要删除 pool 可以使用以下命令：</p>
+<pre><code>#  ceph osd pool delete  cephfs_data cephfs_data --yes-i-really-really-mean-it
+</code></pre>
+<h3 id="创建-cephfs"><a href="#创建-cephfs" class="headerlink" title="创建 cephfs"></a>创建 cephfs</h3><pre><code># ceph fs new mycephfs cephfs_meta cephfs_data
+</code></pre>
+<h3 id="挂载-cephfs"><a href="#挂载-cephfs" class="headerlink" title="挂载 cephfs"></a>挂载 cephfs</h3><p>监控节点的密钥可以通过在监控节点执行 “sudo cat &#x2F;etc&#x2F;ceph&#x2F;ceph.client.admin.keyring|grep key|cut -d” “ -f3” 获取。</p>
+<pre><code># mount -t ceph 监控节点IP:6789:/ 目录挂载点 -o name=admin,secret=&quot;监控节点密钥&quot;,acl,async,rw,noexec,nodev,noatime,nodiratime
+</code></pre>
+<p>示例：</p>
+<pre><code># mount -t ceph 192.168.1.30:6789,192.168.1.32:6789,192.168.1.34:6789,192.168.1.35:6789,192.168.1.37:6789:/ /lotus -o name=admin,secret=&quot;AQCyVdde8Y5EDBAAQCrFCJYVsmXZHAZC+4mAJQ==&quot;,acl,async,rw,noexec,nodev,noatime,nodiratime
+</code></pre>
+<hr>
+<h2 id="实施中遇到的其他问题"><a href="#实施中遇到的其他问题" class="headerlink" title="实施中遇到的其他问题"></a>实施中遇到的其他问题</h2><ol>
+<li><p>用parted分区后的分区表不会立即生效，需要重启。如果不想重启，可以使用 <code>partprobe</code> 命令，此命令可以让系统内核重新读取分区表信息，就不用重新启动电脑。</p>
+</li>
+<li><p>如果硬盘在使用之前已经有了 GPT 分区创建 OSD 的时候就会报报 <code>error: GPT headers found</code> ，这时可以直接用 dd 将 GPT 分区删掉：</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/zero of=/dev/sdb bs=512K count=1</span></span><br></pre></td></tr></table></figure>
+<p> 如果需要添加的硬盘在已存在的lvm卷组里，譬如重置环境后需要加入新的集群的 osd ，可以用以下命令先脱离 lvm ，再删除GPT分区：</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">lvremove -vf `lvdisplay|grep <span class="string">&quot;LV Path&quot;</span>|awk <span class="string">&#x27;&#123;print $3&#125;&#x27;</span>`</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">vgremove -vf `vgdisplay|grep <span class="string">&quot;VG Name&quot;</span>|awk <span class="string">&#x27;&#123;print $3&#125;&#x27;</span>`</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">pvremove -vf `pvdisplay|grep <span class="string">&quot;PV Name&quot;</span>|awk <span class="string">&#x27;&#123;print $3&#125;&#x27;</span>`</span></span><br></pre></td></tr></table></figure>
+
+</li>
+<li><p>修改 ceph.conf后要使用 <code>ceph-deploy --overwrite-conf config push 所有节点名称</code> 来把新配置推送到所有节点上。</p>
+</li>
+<li><p>如果删除 pool 报错 <code>Error EPERM: pool deletion is disabled; you must first set the mon_allow_pool_delete config option to true before you can destroy a pool</code> ，则可以添加 <code>mon_allow_pool_delete = true</code> 到 ceph.conf ，然后执行 <code>ceph osd pool delete  lotus lotus --yes-i-really-really-mean-it</code> ，或者用下面的方法</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">ceph tell mon.\* injectargs <span class="string">&#x27;--mon-allow-pool-delete=true&#x27;</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">ceph osd pool delete  lotus lotus --yes-i-really-really-mean-it</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>错误：</p>
+<pre><code> # rbd: create error: (33) Numerical argument out of domain
+ # 2020-03-09 22:38:32.177 7fe1a39ecf40 -1 librbd::image::CreateRequest: validate_order: order must be in the range [12, 25]
+</code></pre>
+<p> 原因：<code>rbd_default_order</code> 配置过高，这个配置项决定了集群内切块的大小，默认是22，范围是[12, 25]，不在这个范围都会报错。</p>
+</li>
+<li><p>错误：集群大小与实际存储容量不符合</p>
+<p>原因：RBD 进行数据删除的时候实际上并不会直接删除对象，而是给对象打上已删除的标记，所以删除内容还是在集群内占用空间。这里需要通过文件系统去主动释放被标记为已删除的对象 <code>sudo fstrim rbd挂载目录</code> 。</p>
+</li>
+<li><p>错误：pg 数设置错误，需要调整</p>
+<p>解决方法（另外这里需要注意，pg 数不能一次性扩大太多，每次调整的大小尽量不要超过100%）：</p>
+<pre><code> # ceph osd pool set cephfs_data pg_num 4096
+ # ceph osd pool set cephfs_data pgp_num 4096
+</code></pre>
+</li>
+<li><p>错误：监控节点数量添加少了，需要调整</p>
+<p>解决方法：</p>
+<pre><code> # ceph-deploy mon add 新增监视器主机名
+</code></pre>
+<p> 这里有一点要注意，所有监视器一定要设置 NTP 同步，尽量选择同一个 NTP 服务器进行同步。</p>
+<p> 而一旦添加了新的Ceph监视器，Ceph将开始同步监视器并形成仲裁。可以通过执行以下操作检查仲裁状态：</p>
+<pre><code> # ceph quorum_status --format json-pretty
+</code></pre>
+</li>
+<li><p>错误：cephfs出现错误需要重建，删除pool却显示pool正在被cephfs使用中</p>
+<p>解决方法：</p>
+<p> 首先停止mds的服务</p>
+<pre><code> # systemctl stop ceph-mds@$HOSTNAME
+</code></pre>
+<p> 然后 设置mds为失败</p>
+<pre><code> # ceph mds fail 0    
+</code></pre>
+<p> 接着删除cephfs</p>
+<pre><code> # ceph fs rm mycephfs --yes-i-really-mean-it  
+</code></pre>
+<p> 然后删除cephfs使用的pool</p>
+<pre><code> # ceph osd pool delete  lotus lotus --yes-i-really-really-mean-it
+</code></pre>
+</li>
+</ol>
+<hr>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2024-03-11T18:14:54.495Z" itemprop="dateUpdated">2024-03-12 02:14:54</time>
+</span><br>
+
+
+        
+    </div>
+    
+    <footer>
+        <a href="https://blog.jugg.xyz">
+            <img src="/img/avatar.webp" alt="Sean Fang">
+            Sean Fang
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Ceph/" rel="tag">Ceph</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.jugg.xyz/2020/07/02/ops/Ceph-Deploy/&title=《使用 ceph-deploy 部署 Ceph 集群》 — S1eke's Blog&pic=https://blog.jugg.xyz/img/avatar.webp" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.jugg.xyz/2020/07/02/ops/Ceph-Deploy/&title=《使用 ceph-deploy 部署 Ceph 集群》 — S1eke's Blog&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.jugg.xyz/2020/07/02/ops/Ceph-Deploy/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《使用 ceph-deploy 部署 Ceph 集群》 — S1eke's Blog&url=https://blog.jugg.xyz/2020/07/02/ops/Ceph-Deploy/&via=https://blog.jugg.xyz" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.jugg.xyz/2020/07/02/ops/Ceph-Deploy/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/2020/12/10/repost/Why-is-it-hard-for-the-big-domestic-manufacturers-to-make-a-mark-in-the-toB-field/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">为什么国内大厂很难在toB领域出成绩</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2019/10/09/ops/Python-Exercises/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">记一次 Python 脚本坑</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>Sean Fang &copy; 2015 - 2024</span>
+            <span>
+                
+                Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.jugg.xyz/2020/07/02/ops/Ceph-Deploy/&title=《使用 ceph-deploy 部署 Ceph 集群》 — S1eke's Blog&pic=https://blog.jugg.xyz/img/avatar.webp" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.jugg.xyz/2020/07/02/ops/Ceph-Deploy/&title=《使用 ceph-deploy 部署 Ceph 集群》 — S1eke's Blog&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.jugg.xyz/2020/07/02/ops/Ceph-Deploy/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《使用 ceph-deploy 部署 Ceph 集群》 — S1eke's Blog&url=https://blog.jugg.xyz/2020/07/02/ops/Ceph-Deploy/&via=https://blog.jugg.xyz" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.jugg.xyz/2020/07/02/ops/Ceph-Deploy/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACKUlEQVR42u3aUa7DIAwF0e5/03lSfyvSuTZ5Us3wFdGkcFLJBZvXC7fr3UjPqq2e/bz+vH9bkyFDxs8yyPBksNX9q6fSnvtXI0OGjBMY90GWB1A+dT4u+QOQIUOGDDJREkDTfhkyZMh4IuCmy0pyvwwZMmTwTSxfApKcWJqA27YXlyFDxg8y0sLAf14/WN+QIUPGjzCusPHvScdtzUqGDBmjGfwgxa7tKJ90moCTIUPGVAYfOF2ukeF5Ku1LjwwZMkYzaoVDnnqrHbbg22kZMmScwEin3t+a1soMX56VIUPGMQxeYtwV63YtHGXIkDGbcR8o0xRYp6cWoJc7chkyZAxi9I+lpgdV0+No6I9BhgwZxzB4YSAdPi1k8lKBDBkyzmSkVYUOOy1eLl+HDBkyRjP6R8H6abX09X35BhkyZIxm8JvIgvKJoMxfqAwZMuYxatvU+34SCWvXS6oMGTKOYaSbTB5wCZvPBFViZciQMY5RO7CVJv3JBrgY1mXIkDGUcYHGJ5Rubmu5suXvIEOGjNGMflqNh1F+gDVI2MmQIWM0Ax26aizj4tCJw7EMGTLOYVxhqx3UqG2Sg2dlyJAxmlE7nsUXhXzRWUvnyZAh4xwGP1rx+NsqFRJkyJBxDqOY5Gov2mp3BuUBGTJkHMYgSP4pT9WhTbUMGTJkgC8loZMn2jaUMGXIkDGO0Ql5vCctkQafypAhYzSjtoHk4ZgXJne9CBkyZAxi/AF/1/oIFUOifQAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+<script src="/js/main.js?v=1.7.2"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="/js/search.js?v=1.7.2" async></script>
+
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = 'S1eke\'s Blog';
+            clearTimeout(titleTime);
+        } else {
+            document.title = 'S1eke\'s Blog';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>

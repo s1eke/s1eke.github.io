@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>用git服务器和hexo搭建博客 | S1eke&#39;s Blog | I&#39;m curious.</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="Git,Hexo,Nginx">
+    <meta name="description" content="Git安装  git 安装非常简单，几乎所有的发行版都能在官方源找到，直接用包管理器下载即可。由于我的 vps 使用的 debian ，所以： #apt install git   Git使用 Git仓库初始化  git 的初始化仓库命令是 git init，git 服务器一般都会带上 –bare 参数，这样不会在服务器上生成工作目录，不过由于我的需求是通过 git 同步 hexo 站点，所以：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用git服务器和hexo搭建博客">
+<meta property="og:url" content="https://blog.jugg.xyz/2017/05/15/ops/Git-And-Hexo/index.html">
+<meta property="og:site_name" content="S1eke&#39;s Blog">
+<meta property="og:description" content="Git安装  git 安装非常简单，几乎所有的发行版都能在官方源找到，直接用包管理器下载即可。由于我的 vps 使用的 debian ，所以： #apt install git   Git使用 Git仓库初始化  git 的初始化仓库命令是 git init，git 服务器一般都会带上 –bare 参数，这样不会在服务器上生成工作目录，不过由于我的需求是通过 git 同步 hexo 站点，所以：">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-05-15T06:43:13.000Z">
+<meta property="article:modified_time" content="2024-03-11T18:14:54.495Z">
+<meta property="article:author" content="Sean Fang">
+<meta property="article:tag" content="Git">
+<meta property="article:tag" content="Hexo">
+<meta property="article:tag" content="Nginx">
+<meta name="twitter:card" content="summary">
+    
+        <link rel="alternate" type="application/atom+xml" title="S1eke&#39;s Blog" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/img/favicon.png">
+    <link rel="stylesheet" href="/css/style.css?v=1.7.2">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.webp">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Sean Fang</h5>
+          <a href="mailto:silence.boy@live.cn" title="silence.boy@live.cn" class="mail">silence.boy@live.cn</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                归档
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                分类
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/Timeline"  >
+                <i class="icon icon-lg icon-pagelines"></i>
+                时间线
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/s1eke" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">用git服务器和hexo搭建博客</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">用git服务器和hexo搭建博客</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2017-05-15T06:43:13.000Z" itemprop="datePublished" class="page-time">
+  2017-05-15
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E8%BF%90%E7%BB%B4/">运维</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Git%E5%AE%89%E8%A3%85"><span class="post-toc-text">Git安装</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Git%E4%BD%BF%E7%94%A8"><span class="post-toc-text">Git使用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#happy-%C2%B4%E2%96%BD-%CA%83%E2%99%A1%C6%AA"><span class="post-toc-text">happy(´▽&#96;ʃ♡ƪ)</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-ops/Git-And-Hexo"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">用git服务器和hexo搭建博客</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017-05-15 14:43:13" datetime="2017-05-15T06:43:13.000Z"  itemprop="datePublished">2017-05-15</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E8%BF%90%E7%BB%B4/">运维</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="Git安装"><a href="#Git安装" class="headerlink" title="Git安装"></a>Git安装</h2><p>  git 安装非常简单，几乎所有的发行版都能在官方源找到，直接用包管理器下载即可。由于我的 vps 使用的 debian ，所以：</p>
+<pre><code>#apt install git 
+</code></pre>
+<h2 id="Git使用"><a href="#Git使用" class="headerlink" title="Git使用"></a>Git使用</h2><ol>
+<li><p>Git仓库初始化</p>
+<p> git 的初始化仓库命令是 git init，git 服务器一般都会带上 –bare 参数，这样不会在服务器上生成工作目录，不过由于我的需求是通过 git 同步 hexo 站点，所以：</p>
+<pre><code> #git init weibo
+</code></pre>
+<p> 当然，在此之前还要创建个 git 用户，最好把仓库放在git用户有权限的目录下或者用root创建目录，再 chown 给 git 用户。</p>
+</li>
+<li><p>Git同步</p>
+<p> 我的需求是 git+nginx+hexo ，完成本地编写网页，再通过 git 来 push 到 nginx 目录下。所以上一步的初始化工作就默认是在 nginx 的目录下完成的。</p>
+<p> 首先我们要修改服务器上的两个文件，一个是 .git&#x2F;config ，因为默认的配置是不允许 push 操作的，这和我们的需求不同，需要添加如下代码：</p>
+<pre><code> [receive]
+ denyCurrentBranch = ignore
+</code></pre>
+<p> 解决了不能 push 的问题后，还要解决一个不能同步的问题，因为git服务器的主要作用还是共享数据，所以本地工作目录的文件在别的设备 push 上来后并不会即时同步，必须要手动输入 git reset –hard 才能同步，为了让 git 自动同步 push 内容到 work directory 这里就要用到 git 的 hooks 功能，也就是钩子。</p>
+<p> 仓库的 .git 目录下有一个 hooks 目录，在仓库数据遭遇改变时，hooks下的脚本就会自动执行。所以我们要在这个目录下创建一个新的脚本：</p>
+<pre><code> root@vultr ~www/html/weibo (git)-[master] # cat .git/hooks/post-receive 
+ #!/bin/bash
+ git --work-tree=/var/www/html/weibo checkout -f
+</code></pre>
+<p> 然后再确定此文件归属 git 用户，还要给予他可执行权限：</p>
+<pre><code> # chown git:git post-receive
+ # chmod +x post-receive
+</code></pre>
+<p> OK了，现在要开始在本地搭建hexo站点，这个非常简单，暂不赘述。搭建完后，使用 hexo g 生成静态文件，再进入静态文件目录 clone 下服务端的仓库：</p>
+<pre><code> # git clone git@sieke.lt:/var/www/html/weibo
+</code></pre>
+<p> 接下来就很简单了，把hexo生成的静态页面再 push 上远程仓库，hooks会自动让仓库的工作目录自动同步 push 内容，一个 git+nginx+hexo 的组合就这么完成了。<br> 最后顺便说一下 push 过程(ps.以readme.txt为例.)：</p>
+<pre><code> # git add readme.txt
+ # git commit -m &quot;此处填写改动声明。&quot;
+ # git push origin master
+</code></pre>
+</li>
+</ol>
+<h2 id="happy-´▽-ʃ♡ƪ"><a href="#happy-´▽-ʃ♡ƪ" class="headerlink" title="happy(´▽&#96;ʃ♡ƪ)"></a>happy(´▽&#96;ʃ♡ƪ)</h2>
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2024-03-11T18:14:54.495Z" itemprop="dateUpdated">2024-03-12 02:14:54</time>
+</span><br>
+
+
+        
+    </div>
+    
+    <footer>
+        <a href="https://blog.jugg.xyz">
+            <img src="/img/avatar.webp" alt="Sean Fang">
+            Sean Fang
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Git/" rel="tag">Git</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Hexo/" rel="tag">Hexo</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nginx/" rel="tag">Nginx</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.jugg.xyz/2017/05/15/ops/Git-And-Hexo/&title=《用git服务器和hexo搭建博客》 — S1eke's Blog&pic=https://blog.jugg.xyz/img/avatar.webp" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.jugg.xyz/2017/05/15/ops/Git-And-Hexo/&title=《用git服务器和hexo搭建博客》 — S1eke's Blog&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.jugg.xyz/2017/05/15/ops/Git-And-Hexo/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《用git服务器和hexo搭建博客》 — S1eke's Blog&url=https://blog.jugg.xyz/2017/05/15/ops/Git-And-Hexo/&via=https://blog.jugg.xyz" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.jugg.xyz/2017/05/15/ops/Git-And-Hexo/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/2017/05/19/ops/LAMP/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">LAMP环境搭建</h4>
+      </a>
+    </div>
+  
+
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>Sean Fang &copy; 2015 - 2024</span>
+            <span>
+                
+                Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.jugg.xyz/2017/05/15/ops/Git-And-Hexo/&title=《用git服务器和hexo搭建博客》 — S1eke's Blog&pic=https://blog.jugg.xyz/img/avatar.webp" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.jugg.xyz/2017/05/15/ops/Git-And-Hexo/&title=《用git服务器和hexo搭建博客》 — S1eke's Blog&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.jugg.xyz/2017/05/15/ops/Git-And-Hexo/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《用git服务器和hexo搭建博客》 — S1eke's Blog&url=https://blog.jugg.xyz/2017/05/15/ops/Git-And-Hexo/&via=https://blog.jugg.xyz" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.jugg.xyz/2017/05/15/ops/Git-And-Hexo/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACIElEQVR42u3aS5KDMAwFQO5/6cwBMpAnCRbYzSoVEuxmobI+xxFfn+A6+2XytO/vjycuDAyM1zJ6m/u+W13l++7Z5+vVMTAw9mGcLXz96Ot/XZOuqfneMDAwMM5+EwXB1oEPAwMD417GE3gMDAyMSRI7D6NJYe7xXBwDA+OFjMlx7enPj/Q3MDAwXsX4FK9qEW3ScijsCgMDY2nGpAHZawzcFXAxMDD2YSSDWb3wVy2rJYH79BsMDIwNGL02QF44m7QKol1hYGBsw8iHJKrL9DZaaABgYGAszXiiSZBsJQ/E1VePgYGxHiMfdEgendytDoFFe8DAwFiaUT0CVpPVSUEtT54xMDDWZiSJYh5MyyGyOK5RaGFiYGAsxMgLW3eF2t5YRvRaMTAwtmH0hi3yQJwU78rDFhgYGEszeoe23uBpUnTLWwX/nHAxMDAWZVTTyElBbd5CKBwuMTAwFmJUw+Wk6Vh9BYUQj4GBsTRjvq056a61MDAwdmBUF+iV+JMRtOprwsDA2IeRtwryanwvq662EzAwMPZh3DbyPg7E+av5MRaGgYGxBONTvCaJbq/lEFExMDCWZuRXUqxPDpG9oYrysAUGBsZyjGqQ7QXoPB3NRy4wMDB2Y0ySzGp0nxz7fuTiGBgYGK1Bijx8j6gYGBgY8cJ5ySzZeiFhxsDA2ICRJ6K94YlCOtp7lRgYGEsz8tSxenAsJ6KD8I2BgbEo4w/HsSy6esybwwAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+<script src="/js/main.js?v=1.7.2"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="/js/search.js?v=1.7.2" async></script>
+
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = 'S1eke\'s Blog';
+            clearTimeout(titleTime);
+        } else {
+            document.title = 'S1eke\'s Blog';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>
