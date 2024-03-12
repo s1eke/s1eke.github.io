@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>跨平台构建docker镜像 | S1eke&#39;s Blog | I&#39;m curious.</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="docker,buildx">
+    <meta name="description" content="业务需要同时运行在 x86_64 和 arm64 两种架构的机器上，贫穷让公司选择了跨平台构建。 安装 buildxbuildx 是作为 docker cli 的一个插件存在的，所以如果已经在系统中配置了 docker 仓库的话，直接用系统的包管理器安装 docker-buildx-plugin 即可，这也是最推荐的方案。 如果非要手动安装，可以自行从  docker buildx github">
+<meta property="og:type" content="article">
+<meta property="og:title" content="跨平台构建docker镜像">
+<meta property="og:url" content="https://blog.jugg.xyz/2024/03/12/ops/cross-platform-image-building-with-docker-buildx/index.html">
+<meta property="og:site_name" content="S1eke&#39;s Blog">
+<meta property="og:description" content="业务需要同时运行在 x86_64 和 arm64 两种架构的机器上，贫穷让公司选择了跨平台构建。 安装 buildxbuildx 是作为 docker cli 的一个插件存在的，所以如果已经在系统中配置了 docker 仓库的话，直接用系统的包管理器安装 docker-buildx-plugin 即可，这也是最推荐的方案。 如果非要手动安装，可以自行从  docker buildx github">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-03-12T06:47:39.000Z">
+<meta property="article:modified_time" content="2024-03-12T18:49:09.336Z">
+<meta property="article:author" content="Sean Fang">
+<meta property="article:tag" content="docker">
+<meta property="article:tag" content="buildx">
+<meta name="twitter:card" content="summary">
+    
+        <link rel="alternate" type="application/atom+xml" title="S1eke&#39;s Blog" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/img/favicon.png">
+    <link rel="stylesheet" href="/css/style.css?v=1.7.2">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.webp">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Sean Fang</h5>
+          <a href="mailto:silence.boy@live.cn" title="silence.boy@live.cn" class="mail">silence.boy@live.cn</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                归档
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                分类
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/Timeline"  >
+                <i class="icon icon-lg icon-pagelines"></i>
+                时间线
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/s1eke" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">跨平台构建docker镜像</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">跨平台构建docker镜像</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2024-03-12T06:47:39.000Z" itemprop="datePublished" class="page-time">
+  2024-03-12
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E8%BF%90%E7%BB%B4/">运维</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E5%AE%89%E8%A3%85-buildx"><span class="post-toc-text">安装 buildx</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%9E%84%E5%BB%BA%E5%99%A8"><span class="post-toc-text">初始化构建器</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E5%BC%80%E5%A7%8B%E6%9E%84%E5%BB%BA"><span class="post-toc-text">开始构建</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-ops/cross-platform-image-building-with-docker-buildx"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">跨平台构建docker镜像</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2024-03-12 14:47:39" datetime="2024-03-12T06:47:39.000Z"  itemprop="datePublished">2024-03-12</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E8%BF%90%E7%BB%B4/">运维</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>业务需要同时运行在 x86_64 和 arm64 两种架构的机器上，贫穷让公司选择了跨平台构建。</p>
+<h2 id="安装-buildx"><a href="#安装-buildx" class="headerlink" title="安装 buildx"></a>安装 buildx</h2><p>buildx 是作为 docker cli 的一个插件存在的，所以如果已经在系统中配置了 docker 仓库的话，直接用系统的包管理器安装 <code>docker-buildx-plugin</code> 即可，这也是最推荐的方案。</p>
+<p>如果非要手动安装，可以自行从 <a target="_blank" rel="noopener" href="https://github.com/docker/buildx/releases/latest"> docker buildx github releases </a> 进行下载，然后拷贝到 <code>/usr/local/lib/docker/cli-plugins</code> 目录下即可。仅当前用户使用的话也可以放到 <code>$HOME/.docker/cli-plugins</code> 目录。</p>
+<h2 id="初始化构建器"><a href="#初始化构建器" class="headerlink" title="初始化构建器"></a>初始化构建器</h2><p>docker buildx 跨平台打包镜像有两种方案，第一种使用不同架构的机器来做 worker ，但是如果有这种资源我还是比较倾向用 <a target="_blank" rel="noopener" href="https://github.com/GoogleContainerTools/kaniko">kaniko</a>，所以这里暂不赘叙，有需求可以看一下<a target="_blank" rel="noopener" href="https://docs.docker.com/build/building/multi-platform/#multiple-native-nodes">官方文档</a>。这里主要介绍一下第二种，通过 binfmt_misc 和 QEMU 来实现跨平台构建。</p>
+<p>buildx 的跨平台构建，实际上是通过 QEMU 作为构建器后端，然后再利用 binfmt_misc 模块注册 QEMU 作为其他CPU架构可执行文件的处理程序来实现的。我们首先需要先启用 binfmt_misc，这里可以通过 <a target="_blank" rel="noopener" href="https://github.com/tonistiigi/binfmt">tonistiigi&#x2F;binfmt</a> 这个脚本镜像直接实现：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">这里最后的 --install all 是安装所有支持的架构，如果只有特定需求也可以手动指定</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">例如 --install arm64,riscv64,arm</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">docker run --privileged --<span class="built_in">rm</span> tonistiigi/binfmt --install all</span></span><br></pre></td></tr></table></figure>
+
+<p>执行完毕之后，可以通过这两种方法验证是否已经成功开启 binfmt_misc ：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">该命令可以查看当前所有可用构建器，如未启用则 PLATFORMS 应该仅支持 amd64 和 386 相关的架构</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">docker buildx <span class="built_in">ls</span></span></span><br><span class="line">NAME/NODE     DRIVER/ENDPOINT   STATUS    BUILDKIT   PLATFORMS</span><br><span class="line">default*      docker</span><br><span class="line"> \_ default    \_ default       running   v0.12.5    linux/amd64, linux/amd64/v2, linux/amd64/v3, linux/386, linux/arm64, linux/riscv64, linux/ppc64le, linux/s390x, linux/mips64le, linux/mips64, linux/arm/v7, linux/arm/v6</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">该命令可以查看 binfmt_misc 的开启状态</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cat</span> /proc/sys/fs/binfmt_misc/status</span></span><br></pre></td></tr></table></figure>
+
+<p>确认无误后，即可开始创建构建器：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">docker buildx create --name mybuilder --bootstrap --use</span></span><br></pre></td></tr></table></figure>
+
+<p>创建完之后就有了一个可用的，名称叫 mybuilder 构建器，这里再详细介绍一些参数：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">docker buildx create \</span></span><br><span class="line"><span class="language-bash">  --name mybuilder \</span></span><br><span class="line"><span class="language-bash">  --driver=docker-container \</span></span><br><span class="line"><span class="language-bash">  --driver-opt <span class="string">&quot;network=host&quot;</span> \</span></span><br><span class="line"><span class="language-bash">  --config /etc/buildkitd.toml \</span></span><br><span class="line"><span class="language-bash">  --bootstrap \</span></span><br><span class="line"><span class="language-bash">  --use</span></span><br></pre></td></tr></table></figure>
+
+<p>第一个参数 –name 就不用讲了，我们从第二个开始。</p>
+<blockquote>
+<p>–driver&#x3D;docker-container</p>
+</blockquote>
+<p>其实在安装 docker buildx 之后，就可以通过 docker buildx ls 看到一个 default 构建器，但是这个构建器并不可用到跨平台构建上，即使启用了 binfmt_misc 。原因就是因为这个 driver。docker driver 的构建器只会有一个 default ，无法单独指定创建，不使用 buildx 的时候的 docker 操作，其实都是在使用这个构建器。</p>
+<p>docker driver 考虑的更多的是简单和易用两个方面，而我们这里指定的 docker-container driver 比 dokcer driver 要灵活很多，可以指定 BuildKit 版本、通过 QEMU 进行跨平台构建以及更高级的缓存导出功能（ps.这里的更高级指的是相对于 docker drvier 只能将缓存导出到镜像中而言）。同时也是 <code>docker buildx create</code> 默认 driver，所以也基本不用指定。</p>
+<p>除了 docker 和 docker-container 之外还有 kubernetes 和 remote 两个 driver，主要差异在于使用场景上，这里不多缀述，有兴趣可以看一下<a target="_blank" rel="noopener" href="https://docs.docker.com/build/drivers/">官方文档</a>。</p>
+<blockquote>
+<p>–driver-opt “network&#x3D;host”</p>
+</blockquote>
+<p>构建器实际上是打开一个 buildkit 容器进行构建，如果对这个容器有任何的配置需求，基本都是写在这个参数中，包括资源限制、启动的镜像、重启策略、环境变量以及我们这里写的网络的配置，具体可选配置可参考<a target="_blank" rel="noopener" href="https://docs.docker.com/build/drivers/docker-container/#synopsis">该表格</a>。</p>
+<p>这里单独使用了一个 network&#x3D;host 是因为遇到过构建时网络情况和预期不一致的情况。譬如拥有两个dns，一个用于内网一个用于外网，如果不使用 host 网络，则构建时就会使用 docker 内部 dns。作为一个构建镜像的基础服务，为了规避可能存在的干扰，还是建议使用 host 网络。</p>
+<blockquote>
+<p>–config &#x2F;etc&#x2F;buildkitd.toml</p>
+</blockquote>
+<p>与所有服务一样的，buildkit 也是有配置文件的，具体的配置内容可以参考<a target="_blank" rel="noopener" href="https://docs.docker.com/build/buildkit/toml-configuration/">官方的配置文件</a>。当然了，这里的大多数配置都是无须更改的，这里单独将 config 拎出来，是因为有一种比较常见的情况是，构建的 base image 来自私有仓库，使用 http 或者自签 SSL 证书。</p>
+<p>因为构建时并不在物理机而是在 buildkit 镜像内，所以它也没办法读 <code>/etc/docker/daemon.json</code> 的配置，必须要单独配置，例如：</p>
+<figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[registry.&quot;192.168.189.102:5000&quot;]</span></span><br><span class="line"><span class="attr">http</span> = <span class="literal">true</span></span><br><span class="line"><span class="attr">insecure</span> = <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>–bootstrap –use</p>
+</blockquote>
+<p>bootstrap 就是创建的同时启动这个构建器使用的 buildkit 容器，use 就是创建的同时切换到这个构建器。</p>
+<h2 id="开始构建"><a href="#开始构建" class="headerlink" title="开始构建"></a>开始构建</h2><p>前置准备虽然漫长的，但是实践总是很简单的，首先准备一个Dockerfile：</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> alpine:<span class="number">3.19</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> apk add curl</span></span><br></pre></td></tr></table></figure>
+
+<p>然后执行构建命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t ccr.ccs.tencentyun.com/openimage/alpine:3.19 --push .</span></span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">(以下省略一堆输出)</span><br><span class="line"> =&gt; =&gt; pushing manifest for ccr.ccs.tencentyun.com/openimage/alpine:3.19@sha256:d2ca9689374079757822ac8a9bd1e298a96fd10fc7648c4a5043499f61a1e432                                                            2.1s</span><br><span class="line"> =&gt; [auth] openimage/alpine:pull,push token for ccr.ccs.tencentyun.com</span><br></pre></td></tr></table></figure>
+
+<p>命令执行成功，构建完成，当你使用 <code>--push</code> 参数的时候，buildx 甚至自动创建了 manifest ，保证了多个架构镜像共用一个 tag，可以通过 <code>docker buildx imagetools inspect</code> 进行验证。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">docker buildx imagetools inspect ccr.ccs.tencentyun.com/openimage/alpine:3.19</span></span><br><span class="line"></span><br><span class="line">Name:      ccr.ccs.tencentyun.com/openimage/alpine:3.19</span><br><span class="line">MediaType: application/vnd.oci.image.index.v1+json</span><br><span class="line">Digest:    sha256:d2ca9689374079757822ac8a9bd1e298a96fd10fc7648c4a5043499f61a1e432</span><br><span class="line"></span><br><span class="line">Manifests:</span><br><span class="line">  Name:        ccr.ccs.tencentyun.com/openimage/alpine:3.19@sha256:dc6b015793c2ac537f61ec80348a7f34739cfa6580813f24e813d653fc37faf3</span><br><span class="line">  MediaType:   application/vnd.oci.image.manifest.v1+json</span><br><span class="line">  Platform:    linux/amd64</span><br><span class="line"></span><br><span class="line">  Name:        ccr.ccs.tencentyun.com/openimage/alpine:3.19@sha256:a3df735a618653a5bb73c1f09fe73feb30f352c19760326155bebf29172a7de5</span><br><span class="line">  MediaType:   application/vnd.oci.image.manifest.v1+json</span><br><span class="line">  Platform:    linux/arm64</span><br><span class="line"></span><br><span class="line">  Name:        ccr.ccs.tencentyun.com/openimage/alpine:3.19@sha256:1cf066565331d3feb598c1d7fb5a181a151bd6a965ffd891f9ab459e0a708afb</span><br><span class="line">  MediaType:   application/vnd.oci.image.manifest.v1+json</span><br><span class="line">  Platform:    linux/arm/v7</span><br><span class="line"></span><br><span class="line">  Name:        ccr.ccs.tencentyun.com/openimage/alpine:3.19@sha256:d43c80d6216bc643f283163c89b6f3d5813d02e8fa76f5a86115bcf8b16d10a2</span><br><span class="line">  MediaType:   application/vnd.oci.image.manifest.v1+json</span><br><span class="line">  Platform:    unknown/unknown</span><br><span class="line">  Annotations:</span><br><span class="line">    vnd.docker.reference.digest: sha256:dc6b015793c2ac537f61ec80348a7f34739cfa6580813f24e813d653fc37faf3</span><br><span class="line">    vnd.docker.reference.type:   attestation-manifest</span><br><span class="line"></span><br><span class="line">  Name:        ccr.ccs.tencentyun.com/openimage/alpine:3.19@sha256:c2e29cae1de1f6d4f285ed5055c871c745862054c8693b2e4d51fa9c3cb49954</span><br><span class="line">  MediaType:   application/vnd.oci.image.manifest.v1+json</span><br><span class="line">  Platform:    unknown/unknown</span><br><span class="line">  Annotations:</span><br><span class="line">    vnd.docker.reference.digest: sha256:a3df735a618653a5bb73c1f09fe73feb30f352c19760326155bebf29172a7de5</span><br><span class="line">    vnd.docker.reference.type:   attestation-manifest</span><br><span class="line"></span><br><span class="line">  Name:        ccr.ccs.tencentyun.com/openimage/alpine:3.19@sha256:b593bc641ba6ea8d046ff4d6e78f73ac4be1422c1ad3db0fc23dfc07950d049b</span><br><span class="line">  MediaType:   application/vnd.oci.image.manifest.v1+json</span><br><span class="line">  Platform:    unknown/unknown</span><br><span class="line">  Annotations:</span><br><span class="line">    vnd.docker.reference.digest: sha256:1cf066565331d3feb598c1d7fb5a181a151bd6a965ffd891f9ab459e0a708afb</span><br><span class="line">    vnd.docker.reference.type:   attestation-manifest</span><br></pre></td></tr></table></figure>
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2024-03-12T18:49:09.336Z" itemprop="dateUpdated">2024-03-13 02:49:09</time>
+</span><br>
+
+
+        
+    </div>
+    
+    <footer>
+        <a href="https://blog.jugg.xyz">
+            <img src="/img/avatar.webp" alt="Sean Fang">
+            Sean Fang
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/buildx/" rel="tag">buildx</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/docker/" rel="tag">docker</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.jugg.xyz/2024/03/12/ops/cross-platform-image-building-with-docker-buildx/&title=《跨平台构建docker镜像》 — S1eke's Blog&pic=https://blog.jugg.xyz/img/avatar.webp" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.jugg.xyz/2024/03/12/ops/cross-platform-image-building-with-docker-buildx/&title=《跨平台构建docker镜像》 — S1eke's Blog&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.jugg.xyz/2024/03/12/ops/cross-platform-image-building-with-docker-buildx/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《跨平台构建docker镜像》 — S1eke's Blog&url=https://blog.jugg.xyz/2024/03/12/ops/cross-platform-image-building-with-docker-buildx/&via=https://blog.jugg.xyz" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.jugg.xyz/2024/03/12/ops/cross-platform-image-building-with-docker-buildx/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2020/12/10/repost/Why-is-it-hard-for-the-big-domestic-manufacturers-to-make-a-mark-in-the-toB-field/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">为什么国内大厂很难在toB领域出成绩</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>Sean Fang &copy; 2015 - 2024</span>
+            <span>
+                
+                Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.jugg.xyz/2024/03/12/ops/cross-platform-image-building-with-docker-buildx/&title=《跨平台构建docker镜像》 — S1eke's Blog&pic=https://blog.jugg.xyz/img/avatar.webp" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.jugg.xyz/2024/03/12/ops/cross-platform-image-building-with-docker-buildx/&title=《跨平台构建docker镜像》 — S1eke's Blog&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.jugg.xyz/2024/03/12/ops/cross-platform-image-building-with-docker-buildx/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《跨平台构建docker镜像》 — S1eke's Blog&url=https://blog.jugg.xyz/2024/03/12/ops/cross-platform-image-building-with-docker-buildx/&via=https://blog.jugg.xyz" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.jugg.xyz/2024/03/12/ops/cross-platform-image-building-with-docker-buildx/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPYAAAD2CAAAAADAeSUUAAADJklEQVR42u3by27bMBAFUP//T7vbFq2Fe2eUwqYPV4GgMDzUYjCPPB7xev62/n6evJM8f/UkOdvjJxY2Njb2h7Cfl6s9ULLP9ZW9uqZ8/2g3bGxs7OPY14HheutX+9x2xPJsUZDDxsbGxg7AebpyfVltOoSNjY2NvUkb9kWlDQkbGxv7m9kzTHKI9klS9P+vtTRsbGzst2fnXdH3//lH+tvY2NjYb8x+litvD7QJRhtEn4uFjY2NfRK7HXDcjFG215Hs3DaGsbGxsU9lt+GhHYhsi/h3pRzR+9jY2Ngfzs55m+CUJzabUFd8DGxsbOyD2Jtf24S0TQDbDxhhY2Njn8TOb6JtGOTX0RaV2lb0P/bBxsbGPog9Kyfd2/TdvDNLmbCxsbG/gT1rxLYpRxKoZmWvKKxiY2NjH8TepB+zBGPW3J0FTmxsbOyz2W2AubcAtGkYtMM9LyM2NjY29hHsNp3YJAz5iGTbcihaEdjY2NgHsWeF9bwx3JaNbm7lJo0HbGxs7CPY+YHyPzy7lDYJWSVI2NjY2Aex2xCVjGC2u+2Pfn0SbGxs7FPZ+/GafdmoLSRF3+36TWxsbOyD2G0RZzME36Ycs+vYfyRsbGzsz2K3hZtNA3hW+q+/VRLGsLGxsQ9it0FiFnhmjdvZpbQFL2xsbOxT2UnwaINci8zHLmejPNjY2Ngnse9qwW7SibwjPXvz5f8QYGNjY384exai2sSjbS0k1zdLeB6byIyNjY39xuwWuS8GzZoN+1TnjwCGjY2NfQS7HZG5d7Dmp5vKURUNGxsb+yB2XvS56/02dZkFuZd7YmNjYx/HngWzvOgzaxLMRjCjj4SNjY39Beyk5JQcYjbcORvTzNsG2NjY2Gewn+WatYfb4Zu20N82pLGxsbFPYuerHa9s27Ht4M4svNVXgI2Njf0h7FnbNS8tJSFwk+rMho2wsbGxz2PvRydnV9BefdskiBq92NjY2F/GzpOEnNoWldqTYGNjY2NvyvGzJGTf9C1GdrCxsbGPYLdpwKyJ2x5uVvC6uZaGjY2N/fbszfjjbKTmrqCVXH3yJjY2NvbHsn8BI1ErJt8jjckAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+<script src="/js/main.js?v=1.7.2"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="/js/search.js?v=1.7.2" async></script>
+
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = 'S1eke\'s Blog';
+            clearTimeout(titleTime);
+        } else {
+            document.title = 'S1eke\'s Blog';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>
