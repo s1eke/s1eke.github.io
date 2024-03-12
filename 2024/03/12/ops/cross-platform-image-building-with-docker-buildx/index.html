@@ -21,15 +21,15 @@
     
     
     <meta name="keywords" content="docker,buildx">
-    <meta name="description" content="业务需要同时运行在 x86_64 和 arm64 两种架构的机器上，贫穷让公司选择了跨平台构建。 安装 buildxbuildx 是作为 docker cli 的一个插件存在的，所以如果已经在系统中配置了 docker 仓库的话，直接用系统的包管理器安装 docker-buildx-plugin 即可，这也是最推荐的方案。 如果非要手动安装，可以自行从  docker buildx github">
+    <meta name="description" content="业务需要同时运行在 x86_64 和 arm64 两种架构的机器上，贫穷让公司选择了跨平台构建。  安装 buildxbuildx 是作为 docker cli 的一个插件存在的，所以如果已经在系统中配置了 docker 仓库的话，直接用系统的包管理器安装 docker-buildx-plugin 即可，这也是最推荐的方案。 如果非要手动安装，可以自行从  docker buildx githu">
 <meta property="og:type" content="article">
 <meta property="og:title" content="跨平台构建docker镜像">
 <meta property="og:url" content="https://blog.jugg.xyz/2024/03/12/ops/cross-platform-image-building-with-docker-buildx/index.html">
 <meta property="og:site_name" content="S1eke&#39;s Blog">
-<meta property="og:description" content="业务需要同时运行在 x86_64 和 arm64 两种架构的机器上，贫穷让公司选择了跨平台构建。 安装 buildxbuildx 是作为 docker cli 的一个插件存在的，所以如果已经在系统中配置了 docker 仓库的话，直接用系统的包管理器安装 docker-buildx-plugin 即可，这也是最推荐的方案。 如果非要手动安装，可以自行从  docker buildx github">
+<meta property="og:description" content="业务需要同时运行在 x86_64 和 arm64 两种架构的机器上，贫穷让公司选择了跨平台构建。  安装 buildxbuildx 是作为 docker cli 的一个插件存在的，所以如果已经在系统中配置了 docker 仓库的话，直接用系统的包管理器安装 docker-buildx-plugin 即可，这也是最推荐的方案。 如果非要手动安装，可以自行从  docker buildx githu">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-03-12T06:47:39.000Z">
-<meta property="article:modified_time" content="2024-03-12T18:49:09.336Z">
+<meta property="article:modified_time" content="2024-03-12T19:12:17.132Z">
 <meta property="article:author" content="Sean Fang">
 <meta property="article:tag" content="docker">
 <meta property="article:tag" content="buildx">
@@ -194,7 +194,9 @@
 
         </div>
         <div class="post-content" id="post-content" itemprop="postContent">
-            <p>业务需要同时运行在 x86_64 和 arm64 两种架构的机器上，贫穷让公司选择了跨平台构建。</p>
+            <blockquote>
+<p>业务需要同时运行在 x86_64 和 arm64 两种架构的机器上，贫穷让公司选择了跨平台构建。</p>
+</blockquote>
 <h2 id="安装-buildx"><a href="#安装-buildx" class="headerlink" title="安装 buildx"></a>安装 buildx</h2><p>buildx 是作为 docker cli 的一个插件存在的，所以如果已经在系统中配置了 docker 仓库的话，直接用系统的包管理器安装 <code>docker-buildx-plugin</code> 即可，这也是最推荐的方案。</p>
 <p>如果非要手动安装，可以自行从 <a target="_blank" rel="noopener" href="https://github.com/docker/buildx/releases/latest"> docker buildx github releases </a> 进行下载，然后拷贝到 <code>/usr/local/lib/docker/cli-plugins</code> 目录下即可。仅当前用户使用的话也可以放到 <code>$HOME/.docker/cli-plugins</code> 目录。</p>
 <h2 id="初始化构建器"><a href="#初始化构建器" class="headerlink" title="初始化构建器"></a>初始化构建器</h2><p>docker buildx 跨平台打包镜像有两种方案，第一种使用不同架构的机器来做 worker ，但是如果有这种资源我还是比较倾向用 <a target="_blank" rel="noopener" href="https://github.com/GoogleContainerTools/kaniko">kaniko</a>，所以这里暂不赘叙，有需求可以看一下<a target="_blank" rel="noopener" href="https://docs.docker.com/build/building/multi-platform/#multiple-native-nodes">官方文档</a>。这里主要介绍一下第二种，通过 binfmt_misc 和 QEMU 来实现跨平台构建。</p>
@@ -233,7 +235,7 @@
 <p>–bootstrap –use</p>
 </blockquote>
 <p>bootstrap 就是创建的同时启动这个构建器使用的 buildkit 容器，use 就是创建的同时切换到这个构建器。</p>
-<h2 id="开始构建"><a href="#开始构建" class="headerlink" title="开始构建"></a>开始构建</h2><p>前置准备虽然漫长的，但是实践总是很简单的，首先准备一个Dockerfile：</p>
+<h2 id="开始构建"><a href="#开始构建" class="headerlink" title="开始构建"></a>开始构建</h2><p>前置准备虽然漫长，但是实践总是很简单的，首先准备一个Dockerfile：</p>
 <figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> alpine:<span class="number">3.19</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> apk add curl</span></span><br></pre></td></tr></table></figure>
 
 <p>然后执行构建命令：</p>
@@ -248,7 +250,7 @@
     <div class="content">
         
 <span class="post-time">
-    最后更新时间：<time datetime="2024-03-12T18:49:09.336Z" itemprop="dateUpdated">2024-03-13 02:49:09</time>
+    最后更新时间：<time datetime="2024-03-12T19:12:17.132Z" itemprop="dateUpdated">2024-03-13 03:12:17</time>
 </span><br>
 
 
