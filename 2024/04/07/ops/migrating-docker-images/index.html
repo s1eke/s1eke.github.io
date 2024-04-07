@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>镜像迁移 | S1eke&#39;s Blog | I&#39;m curious.</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="docker,harbor">
+    <meta name="description" content="迁移镜像有三种场景 ：  在线迁移：通常是有一台机器能同时连通源镜像仓库和目标镜像仓库就算在线迁移 离线迁移：只要源镜像仓库和目标镜像仓库无法在一台机器上同时联通就算离线迁移 备份：没错，备份也是一种迁移  前置准备迁移之前首先需要有一份迁移的目标，这里我会以部署 k8s 所需要的容器为例。首先需要获取一份所有的镜像清单 images.list，这里通过 kubespray 的离线脚本自动生成。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="镜像迁移">
+<meta property="og:url" content="https://blog.jugg.xyz/2024/04/07/ops/migrating-docker-images/index.html">
+<meta property="og:site_name" content="S1eke&#39;s Blog">
+<meta property="og:description" content="迁移镜像有三种场景 ：  在线迁移：通常是有一台机器能同时连通源镜像仓库和目标镜像仓库就算在线迁移 离线迁移：只要源镜像仓库和目标镜像仓库无法在一台机器上同时联通就算离线迁移 备份：没错，备份也是一种迁移  前置准备迁移之前首先需要有一份迁移的目标，这里我会以部署 k8s 所需要的容器为例。首先需要获取一份所有的镜像清单 images.list，这里通过 kubespray 的离线脚本自动生成。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://oem-1251690846.cos.ap-guangzhou.myqcloud.com/img/uhub.png">
+<meta property="article:published_time" content="2024-04-07T02:52:35.000Z">
+<meta property="article:modified_time" content="2024-04-07T16:01:55.698Z">
+<meta property="article:author" content="Sean Fang">
+<meta property="article:tag" content="docker">
+<meta property="article:tag" content="harbor">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://oem-1251690846.cos.ap-guangzhou.myqcloud.com/img/uhub.png">
+    
+        <link rel="alternate" type="application/atom+xml" title="S1eke&#39;s Blog" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/img/favicon.png">
+    <link rel="stylesheet" href="/css/style.css?v=1.7.2">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.webp">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Sean Fang</h5>
+          <a href="mailto:silence.boy@live.cn" title="silence.boy@live.cn" class="mail">silence.boy@live.cn</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                归档
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                分类
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/Timeline"  >
+                <i class="icon icon-lg icon-pagelines"></i>
+                时间线
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/s1eke" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">镜像迁移</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">镜像迁移</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2024-04-07T02:52:35.000Z" itemprop="datePublished" class="page-time">
+  2024-04-07
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E8%BF%90%E7%BB%B4/">运维</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E5%89%8D%E7%BD%AE%E5%87%86%E5%A4%87"><span class="post-toc-text">前置准备</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E5%9C%A8%E7%BA%BF%E8%BF%81%E7%A7%BB"><span class="post-toc-text">在线迁移</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E7%A6%BB%E7%BA%BF%E8%BF%81%E7%A7%BB"><span class="post-toc-text">离线迁移</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E5%A4%87%E4%BB%BD"><span class="post-toc-text">备份</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-ops/migrating-docker-images"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">镜像迁移</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2024-04-07 10:52:35" datetime="2024-04-07T02:52:35.000Z"  itemprop="datePublished">2024-04-07</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E8%BF%90%E7%BB%B4/">运维</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>迁移镜像有三种场景 ：</p>
+<ol>
+<li><strong>在线迁移</strong>：通常是有一台机器能同时连通源镜像仓库和目标镜像仓库就算在线迁移</li>
+<li><strong>离线迁移</strong>：只要源镜像仓库和目标镜像仓库无法在一台机器上同时联通就算离线迁移</li>
+<li><strong>备份</strong>：没错，备份也是一种迁移</li>
+</ol>
+<h2 id="前置准备"><a href="#前置准备" class="headerlink" title="前置准备"></a>前置准备</h2><p>迁移之前首先需要有一份迁移的目标，这里我会以部署 k8s 所需要的容器为例。首先需要获取一份所有的镜像清单 <code>images.list</code>，这里通过 kubespray 的<a target="_blank" rel="noopener" href="https://github.com/kubernetes-sigs/kubespray/blob/release-2.24/contrib/offline/generate_list.sh">离线脚本</a>自动生成。</p>
+<p><strong>另外需要提前声明一点</strong></p>
+<p><strong>以下的所有迁移，包括备份，都是以一次性迁移所有架构的镜像为目标。</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cat</span> images.list</span></span><br><span class="line">docker.io/mirantis/k8s-netchecker-server:v1.2.2</span><br><span class="line">docker.io/mirantis/k8s-netchecker-agent:v1.2.2</span><br><span class="line">quay.io/coreos/etcd:v3.5.10</span><br><span class="line">quay.io/cilium/cilium:v1.13.4</span><br><span class="line">quay.io/cilium/operator:v1.13.4</span><br><span class="line">quay.io/cilium/hubble-relay:v1.13.4</span><br><span class="line">quay.io/cilium/certgen:v0.1.8</span><br><span class="line">quay.io/cilium/hubble-ui:v0.11.0</span><br><span class="line">quay.io/cilium/hubble-ui-backend:v0.11.0</span><br><span class="line">docker.io/envoyproxy/envoy:v1.22.5</span><br><span class="line">ghcr.io/k8snetworkplumbingwg/multus-cni:v3.8</span><br><span class="line">docker.io/flannel/flannel:v0.22.0</span><br><span class="line">docker.io/flannel/flannel-cni-plugin:v1.1.2</span><br><span class="line">quay.io/calico/node:v3.26.4</span><br><span class="line">quay.io/calico/cni:v3.26.4</span><br><span class="line">quay.io/calico/pod2daemon-flexvol:v3.26.4</span><br><span class="line">quay.io/calico/kube-controllers:v3.26.4</span><br><span class="line">quay.io/calico/typha:v3.26.4</span><br><span class="line">quay.io/calico/apiserver:v3.26.4</span><br><span class="line">docker.io/weaveworks/weave-kube:2.8.1</span><br><span class="line">docker.io/weaveworks/weave-npc:2.8.1</span><br><span class="line">docker.io/kubeovn/kube-ovn:v1.11.5</span><br><span class="line">docker.io/cloudnativelabs/kube-router:v2.0.0</span><br><span class="line">registry.k8s.io/pause:3.9</span><br><span class="line">ghcr.io/kube-vip/kube-vip:v0.5.12</span><br><span class="line">docker.io/library/nginx:1.25.2-alpine</span><br><span class="line">docker.io/library/haproxy:2.8.2-alpine</span><br><span class="line">registry.k8s.io/coredns/coredns:v1.10.1</span><br><span class="line">registry.k8s.io/dns/k8s-dns-node-cache:1.22.28</span><br><span class="line">registry.k8s.io/cpa/cluster-proportional-autoscaler:v1.8.8</span><br><span class="line">docker.io/library/registry:2.8.1</span><br><span class="line">registry.k8s.io/metrics-server/metrics-server:v0.6.4</span><br><span class="line">registry.k8s.io/sig-storage/local-volume-provisioner:v2.5.0</span><br><span class="line">quay.io/external_storage/cephfs-provisioner:v2.1.0-k8s1.11</span><br><span class="line">quay.io/external_storage/rbd-provisioner:v2.1.1-k8s1.11</span><br><span class="line">docker.io/rancher/local-path-provisioner:v0.0.24</span><br><span class="line">registry.k8s.io/ingress-nginx/controller:v1.9.4</span><br><span class="line">docker.io/amazon/aws-alb-ingress-controller:v1.1.9</span><br><span class="line">quay.io/jetstack/cert-manager-controller:v1.13.2</span><br><span class="line">quay.io/jetstack/cert-manager-cainjector:v1.13.2</span><br><span class="line">quay.io/jetstack/cert-manager-webhook:v1.13.2</span><br><span class="line">registry.k8s.io/sig-storage/csi-attacher:v3.3.0</span><br><span class="line">registry.k8s.io/sig-storage/csi-provisioner:v3.0.0</span><br><span class="line">registry.k8s.io/sig-storage/csi-snapshotter:v5.0.0</span><br><span class="line">registry.k8s.io/sig-storage/snapshot-controller:v4.2.1</span><br><span class="line">registry.k8s.io/sig-storage/csi-resizer:v1.3.0</span><br><span class="line">registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.4.0</span><br><span class="line">docker.io/k8scloudprovider/cinder-csi-plugin:v1.22.0</span><br><span class="line">docker.io/amazon/aws-ebs-csi-driver:v0.5.0</span><br><span class="line">docker.io/kubernetesui/dashboard:v2.7.0</span><br><span class="line">docker.io/kubernetesui/metrics-scraper:v1.0.8</span><br><span class="line">quay.io/metallb/speaker:v0.13.9</span><br><span class="line">quay.io/metallb/controller:v0.13.9</span><br><span class="line">registry.k8s.io/kube-apiserver:v1.28.6</span><br><span class="line">registry.k8s.io/kube-controller-manager:v1.28.6</span><br><span class="line">registry.k8s.io/kube-scheduler:v1.28.6</span><br><span class="line">registry.k8s.io/kube-proxy:v1.28.6</span><br></pre></td></tr></table></figure>
+
+<h2 id="在线迁移"><a href="#在线迁移" class="headerlink" title="在线迁移"></a>在线迁移</h2><p>在线迁移是最简单的场景，首先我们确认源镜像，这里已经准备好了，就是上一步中生成的 <code>images.list</code>，其次我们确定目标镜像仓库，迁移目标都是按具体需求来定，这里我们以 <code>uhub.service.ucloud.cn/k8s-use/</code> 为例。</p>
+<p>在线迁移最简单的工具就是 <code>skopeo</code>，安装可以参考<a target="_blank" rel="noopener" href="https://github.com/containers/skopeo/blob/main/install.md">官方文档</a>，这里推荐使用包管理器安装，如果包管理器默认版本太老或者包管理器版本有 bug，就需要<a target="_blank" rel="noopener" href="https://github.com/containers/skopeo/blob/main/install.md#building-from-source">编译安装</a>。</p>
+<p>安装完 <code>skopeo</code> 之后，一个 for 循环即可解决。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">for src in $(cat images.list); do</span><br><span class="line">    image=$&#123;src#*/&#125;</span><br><span class="line">    dest=&quot;uhub.service.ucloud.cn/k8s-use/$&#123;image&#125;&quot;</span><br><span class="line">    skopeo --insecure-policy copy --all  docker://$&#123;src&#125; docker://$&#123;dest&#125;</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+
+<p>这里用到的两个参数：</p>
+<p><code>--insecure-policy</code> 是 <code>skopeo</code> 的参数，因为我本地没有配置 <code>policy</code>，必须要手动指定一个。</p>
+<p><code>--all</code> 是 <code>skopeo copy</code> 的参数，作用是迁移所有架构的镜像。如果需要迁移非当前系统架构，则需要使用参数 <code>--override-os</code>,<code>--override-arch</code>来指定。例如: <code>--override-os linux --override-arch arm64</code>。注意，只要不是使用 <code>--all</code> 参数，都只支持一种架构，要么是当前默认使用当前系统的架构，要么使用通过 <code>--override-*</code> 所指定的架构。只同步部分架构的需求，skoepo官方<a target="_blank" rel="noopener" href="https://github.com/containers/skopeo/issues/1694">尚未实现，也不在规划中</a>，如果有这种需求的话目前还只能通过自己编写 manifest 实现。</p>
+<p>迁移到其他自建的 harbor 也都是一样的操作，但是如果你的 harbor 证书不可信的话还需要在 <code>copy</code> 命令后面加上 <code>--dest-tls-verify=false</code> 来关闭 tls 验证，如果源仓库的证书也不可信的话还需要使用<code>--src-tls-verify=false</code>。</p>
+<p>如果是迁移到其他云服务商的话，还需要注意一个三级路径的问题，多数云服务商的镜像仓库都需要企业版才提供多级路径的功能。所以要么用企业版，要么就需要对镜像重命名。以上面的 for 循环为例，可以把所有的 <code>/</code> 都替换为 <code>-</code>：<code>image=$(echo $&#123;src&#125;| sed &#39;s#^[^/]*/##;s/\//-/g&#39;)</code>。</p>
+<p>另外，在线迁移同样可以使用 <code>skopeo sync</code> 来解决，为了能多水点字，sync 就放到下个场景介绍了。</p>
+<h2 id="离线迁移"><a href="#离线迁移" class="headerlink" title="离线迁移"></a>离线迁移</h2><p>在私有化场景中通常都是需要离线同步镜像的，第一步，需要将镜像转成文件，然后再传入离线环境中再导入，这里同样可以用 <code>skopeo</code>。</p>
+<p><code>skopeo</code> 的安装方法同在线迁移场景中一样，这里不多缀叙。离线迁移用到的是 <code>skopeo sync</code> 命令。离线迁移的步骤会稍微复杂一点，所以我们先写一个脚本：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"></span><br><span class="line">save_images() &#123;</span><br><span class="line">  local image_file=$1</span><br><span class="line">  local src</span><br><span class="line">  for src in $(cat $&#123;image_file&#125;); do</span><br><span class="line">      image=$&#123;src#*/&#125;</span><br><span class="line">      [[ &quot;$image&quot; =~ &quot;/&quot; ]] &amp;&amp; image_path=$&#123;image%%/*&#125; || image_path=&quot;root&quot;</span><br><span class="line">      skopeo --insecure-policy sync --all --src docker --dest dir $&#123;src&#125; images/$&#123;image_path&#125;</span><br><span class="line">  done</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">load_images() &#123;</span><br><span class="line">  local image_file=$1</span><br><span class="line">  local src</span><br><span class="line">  dest_repo=$2</span><br><span class="line">  for src in $(cat $&#123;image_file&#125;); do</span><br><span class="line">    image=$&#123;src#*/&#125;</span><br><span class="line">    [[ &quot;$image&quot; =~ &quot;/&quot; ]] &amp;&amp; image_path=$&#123;image%%/*&#125; || image_path=&quot;root&quot;</span><br><span class="line">    [[ &quot;$image_path&quot; == &quot;root&quot; ]] &amp;&amp; unset dest_name || dest_name=$&#123;image_path&#125;</span><br><span class="line">    skopeo --insecure-policy sync --all --src dir --dest docker images/$&#123;image_path&#125; $&#123;dest_repo&#125;/$&#123;dest_name&#125;</span><br><span class="line">  done</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">case &quot;$1&quot; in</span><br><span class="line">  &quot;save&quot;)</span><br><span class="line">    shift</span><br><span class="line">    save_images &quot;$@&quot;</span><br><span class="line">    ;;</span><br><span class="line">  &quot;load&quot;)</span><br><span class="line">    shift</span><br><span class="line">    load_images &quot;$@&quot;</span><br><span class="line">    ;;</span><br><span class="line">  *)</span><br><span class="line">    echo &quot;Invalid command: $1&quot; &gt;&amp;2</span><br><span class="line">    exit 1</span><br><span class="line">    ;;</span><br><span class="line">esac</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这个脚本也很简单，只有两个函数，一个save_images(),一个load_images(),首先我们需要做的就是将镜像下载到本地，我们将脚本保存为images.sh 并且赋予可执行权限，然后执行以下命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">./images.sh save images.list</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">等待执行完成之后即同步成功了，下载下来的目录如下</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">tree -d</span></span><br><span class="line">.</span><br><span class="line">└── images</span><br><span class="line">    ├── amazon</span><br><span class="line">    │   ├── aws-alb-ingress-controller:v1.1.9</span><br><span class="line">    │   └── aws-ebs-csi-driver:v0.5.0</span><br><span class="line">    ├── calico</span><br><span class="line">    │   ├── apiserver:v3.26.4</span><br><span class="line">    │   ├── cni:v3.26.4</span><br><span class="line">    │   ├── kube-controllers:v3.26.4</span><br><span class="line">    │   ├── node:v3.26.4</span><br><span class="line">    │   ├── pod2daemon-flexvol:v3.26.4</span><br><span class="line">    │   └── typha:v3.26.4</span><br><span class="line">    ├── cilium</span><br><span class="line">    │   ├── certgen:v0.1.8</span><br><span class="line">    │   ├── cilium:v1.13.4</span><br><span class="line">    │   ├── hubble-relay:v1.13.4</span><br><span class="line">    │   ├── hubble-ui-backend:v0.11.0</span><br><span class="line">    │   ├── hubble-ui:v0.11.0</span><br><span class="line">    │   └── operator:v1.13.4</span><br><span class="line">    ├── cloudnativelabs</span><br><span class="line">    │   └── kube-router:v2.0.0</span><br><span class="line">    ├── coredns</span><br><span class="line">    │   └── coredns:v1.10.1</span><br><span class="line">    ├── coreos</span><br><span class="line">    │   └── etcd:v3.5.10</span><br><span class="line">    ├── cpa</span><br><span class="line">    │   └── cluster-proportional-autoscaler:v1.8.8</span><br><span class="line">    ├── dns</span><br><span class="line">    │   └── k8s-dns-node-cache:1.22.28</span><br><span class="line">    ├── envoyproxy</span><br><span class="line">    │   └── envoy:v1.22.5</span><br><span class="line">    ├── external_storage</span><br><span class="line">    │   ├── cephfs-provisioner:v2.1.0-k8s1.11</span><br><span class="line">    │   └── rbd-provisioner:v2.1.1-k8s1.11</span><br><span class="line">    ├── flannel</span><br><span class="line">    │   ├── flannel-cni-plugin:v1.1.2</span><br><span class="line">    │   └── flannel:v0.22.0</span><br><span class="line">    ├── ingress-nginx</span><br><span class="line">    │   └── controller:v1.9.4</span><br><span class="line">    ├── jetstack</span><br><span class="line">    │   ├── cert-manager-cainjector:v1.13.2</span><br><span class="line">    │   ├── cert-manager-controller:v1.13.2</span><br><span class="line">    │   └── cert-manager-webhook:v1.13.2</span><br><span class="line">    ├── k8scloudprovider</span><br><span class="line">    │   └── cinder-csi-plugin:v1.22.0</span><br><span class="line">    ├── k8snetworkplumbingwg</span><br><span class="line">    │   └── multus-cni:v3.8</span><br><span class="line">    ├── kubeovn</span><br><span class="line">    │   └── kube-ovn:v1.11.5</span><br><span class="line">    ├── kubernetesui</span><br><span class="line">    │   ├── dashboard:v2.7.0</span><br><span class="line">    │   └── metrics-scraper:v1.0.8</span><br><span class="line">    ├── kube-vip</span><br><span class="line">    │   └── kube-vip:v0.5.12</span><br><span class="line">    ├── library</span><br><span class="line">    │   ├── haproxy:2.8.2-alpine</span><br><span class="line">    │   ├── nginx:1.25.2-alpine</span><br><span class="line">    │   └── registry:2.8.1</span><br><span class="line">    ├── metallb</span><br><span class="line">    │   ├── controller:v0.13.9</span><br><span class="line">    │   └── speaker:v0.13.9</span><br><span class="line">    ├── metrics-server</span><br><span class="line">    │   └── metrics-server:v0.6.4</span><br><span class="line">    ├── mirantis</span><br><span class="line">    │   ├── k8s-netchecker-agent:v1.2.2</span><br><span class="line">    │   └── k8s-netchecker-server:v1.2.2</span><br><span class="line">    ├── rancher</span><br><span class="line">    │   └── local-path-provisioner:v0.0.24</span><br><span class="line">    ├── root</span><br><span class="line">    │   ├── kube-apiserver:v1.28.6</span><br><span class="line">    │   ├── kube-controller-manager:v1.28.6</span><br><span class="line">    │   ├── kube-proxy:v1.28.6</span><br><span class="line">    │   ├── kube-scheduler:v1.28.6</span><br><span class="line">    │   └── pause:3.9</span><br><span class="line">    ├── sig-storage</span><br><span class="line">    │   ├── csi-attacher:v3.3.0</span><br><span class="line">    │   ├── csi-node-driver-registrar:v2.4.0</span><br><span class="line">    │   ├── csi-provisioner:v3.0.0</span><br><span class="line">    │   ├── csi-resizer:v1.3.0</span><br><span class="line">    │   ├── csi-snapshotter:v5.0.0</span><br><span class="line">    │   ├── local-volume-provisioner:v2.5.0</span><br><span class="line">    │   └── snapshot-controller:v4.2.1</span><br><span class="line">    └── weaveworks</span><br><span class="line">        ├── weave-kube:2.8.1</span><br><span class="line">        └── weave-npc:2.8.1</span><br><span class="line"></span><br><span class="line">85 directories</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>下载之后就可以进行推送了，执行以下命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">./images.sh load images.list uhub.service.ucloud.cn/k8s-use</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">注意，这里的 uhub.service.ucloud.cn/k8s-use 仅是我的示例</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">等待执行完毕之后，即代表推送成功</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>打开推送的目标仓库进行验证。</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://oem-1251690846.cos.ap-guangzhou.myqcloud.com/img/uhub.png" alt="uhub" title="">
+                </div>
+                <div class="image-caption">uhub</div>
+            </figure>
+
+<h2 id="备份"><a href="#备份" class="headerlink" title="备份"></a>备份</h2><p>备份其实是一种很小众的场景，某种意义上来说上面的离线迁移中，将目标镜像全部存到本地就是一种备份了，所以这种常规备份也没有单独介绍的必要了，这里讲一下 harbor 的迁移时将目标全部备份到本地的操作。</p>
+<p>首先放脚本：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"></span><br><span class="line">username=&quot;yourname&quot;</span><br><span class="line">password=&quot;yourpassword&quot;</span><br><span class="line">harbor_url=&quot;harbor.your.url&quot;</span><br><span class="line"></span><br><span class="line">images_dir=&quot;images&quot;</span><br><span class="line">images_list=&quot;images.list&quot;</span><br><span class="line"></span><br><span class="line">project_images_url=&quot;https://$&#123;harbor_url&#125;/api/v2.0/repositories?page=1&amp;page_size=100&quot;</span><br><span class="line">images=$(curl -k -s -X GET -H &quot;Authorization: Basic $(echo -n &quot;$username:$password&quot; | base64)&quot; &quot;$project_images_url&quot; | jq -r &#x27;.[] | .name&#x27;)</span><br><span class="line"></span><br><span class="line">mkdir -p &quot;$images_dir&quot;</span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash"><span class="string">&quot;<span class="variable">$images_dir</span>/<span class="variable">$images_list</span>&quot;</span></span></span><br><span class="line"></span><br><span class="line">cd &quot;$images_dir&quot;</span><br><span class="line">for image in $images; do</span><br><span class="line">    project_name=$(echo $&#123;image&#125; | sed &#x27;s/\/.*//&#x27;)</span><br><span class="line">    repository_name=$(echo $&#123;image&#125; | sed &#x27;s/^[^\/]*\///&#x27;)</span><br><span class="line">    repository_name_recode=$(echo $&#123;repository_name&#125; | sed &#x27;s/\//%252F/g&#x27;)</span><br><span class="line">    artifacts_url=&quot;https://$&#123;harbor_url&#125;/api/v2.0/projects/$&#123;project_name&#125;/repositories/$&#123;repository_name_recode&#125;/artifacts?page=1&amp;page_size=100&amp;with_tag=true&quot;</span><br><span class="line">    tags=$(curl -k -s -X GET -H &quot;Authorization: Basic $(echo -n &quot;$username:$password&quot; | base64)&quot; &quot;$&#123;artifacts_url&#125;&quot; | jq -r &#x27;.[].tags[].name&#x27;)</span><br><span class="line">    for tag in $tags; do</span><br><span class="line">        image_name=$&#123;harbor_url&#125;/$&#123;project_name&#125;/$&#123;repository_name&#125;:$&#123;tag&#125;</span><br><span class="line">        docker pull $&#123;image_name&#125;</span><br><span class="line">        image_arch=$(docker inspect $&#123;image_name&#125; | jq -r &#x27;.[0].Architecture&#x27;)</span><br><span class="line">        docker save $&#123;image_name&#125; &gt;$(echo $&#123;image_name&#125; | awk &#x27;&#123;gsub(/[.\/:]/,&quot;_&quot;)&#125;1&#x27;).$&#123;image_arch&#125;.tar.xz</span><br><span class="line">        echo $&#123;image_name&#125; &gt;&gt;images.list</span><br><span class="line">    done</span><br><span class="line">done</span><br><span class="line"></span><br><span class="line">cd -</span><br><span class="line">tar -c --use-compress-program=&quot;xz -9 -T0&quot; -f images.tar.xz images/</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>简单讲一下备份的思路，首先通过 api 获取所有的仓库，然后遍历所有仓库的 tag，arch，按照最小单位 arch 进行下载镜像打包，最后压缩一下。</p>
+<p>这里之所以没有用上一个场景离线迁移中使用的 skopeo sync ，其实是因为最开始的时候项目被推着上线，就直接弄了一个arm64 harbor ，一个x86 harbor。等演示完毕之后有喘息时间了我突然想要把两个 harbor 合成一个，于是就开始这个场景的操作，先将 x86 harbor 的镜像统一备份下来，然后再构建 manifest 往 arm64 的 harbor 上推。这个场景小众到几乎不可能重复，但是这个脚本甚至是我整篇博客最先完成的部分，我几乎是为了这碟醋包了盘饺子🌚，所以还是必须水出来了。</p>
+<p>正好也为下一篇水一下如何手动构建 manifest 做一个铺垫，完美！</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2024-04-07T16:01:55.698Z" itemprop="dateUpdated">2024-04-08 00:01:55</time>
+</span><br>
+
+
+        
+    </div>
+    
+    <footer>
+        <a href="https://blog.jugg.xyz">
+            <img src="/img/avatar.webp" alt="Sean Fang">
+            Sean Fang
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/docker/" rel="tag">docker</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/harbor/" rel="tag">harbor</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.jugg.xyz/2024/04/07/ops/migrating-docker-images/&title=《镜像迁移》 — S1eke's Blog&pic=https://blog.jugg.xyz/img/avatar.webp" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.jugg.xyz/2024/04/07/ops/migrating-docker-images/&title=《镜像迁移》 — S1eke's Blog&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.jugg.xyz/2024/04/07/ops/migrating-docker-images/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《镜像迁移》 — S1eke's Blog&url=https://blog.jugg.xyz/2024/04/07/ops/migrating-docker-images/&via=https://blog.jugg.xyz" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.jugg.xyz/2024/04/07/ops/migrating-docker-images/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2024/03/12/ops/cross-platform-image-building-with-docker-buildx/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">跨平台构建docker镜像</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>Sean Fang &copy; 2015 - 2024</span>
+            <span>
+                
+                Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.jugg.xyz/2024/04/07/ops/migrating-docker-images/&title=《镜像迁移》 — S1eke's Blog&pic=https://blog.jugg.xyz/img/avatar.webp" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.jugg.xyz/2024/04/07/ops/migrating-docker-images/&title=《镜像迁移》 — S1eke's Blog&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.jugg.xyz/2024/04/07/ops/migrating-docker-images/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《镜像迁移》 — S1eke's Blog&url=https://blog.jugg.xyz/2024/04/07/ops/migrating-docker-images/&via=https://blog.jugg.xyz" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.jugg.xyz/2024/04/07/ops/migrating-docker-images/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACIklEQVR42u3bQW7DMAwEwPz/0+4Diri7lFMg0ugUBKnM8YEQKfb1itd1u5Jf3v/m9/evTywMDIyvZSQhXsF6t3MOePc5eiIGBsYBjPsgZon1/m/vg85jw8DAwMhDyYNYeS4GBgbGelpMUvD9PhgYGBgrRWx7KMyDnhXPGBgY5zDyrvv/f/7I/QYGBsZXMa5ytdT2OnMYFQYGxtaMPMHdB5GUxEuttCQeDAyMAxhJKmzDnR34hi8LAwNjU8bskrK9jJy18IoIMTAwjmHMStOnStn2xQ3PkhgYGF/OaB+2MgSWt+HqaREMDIxNGclgVluCrvOK3TAwMI5h5EVsMsLVHkaT5P62rMXAwDiAsbJRm1Lvv2kPiBgYGOcwnkqC7eDp7NUUYxYYGBhbMNqLxrZZlu/Tpl0MDIwzGXkSTIbj24vJ9gD6xxwuBgbGdow8tbX/ujO7HH2tLwwMjI0Y+XZtgywfV83L2uhiAAMDYztGm2Rn7bN22GI4goaBgXEkYzZy2h4u22GOt5FjYGAcwFjfqG3bPZusMTAwTmAkh7b8AuDZcKOWHAYGxqaMq1wrx8fZkFlExcDA2JrR3hK27f78pawUvRgYGCcwVsrX2aBq3s/P0zQGBsYJjPZysT0OJql5JfVjYGBgrLTekoNgXiTX7UQMDIyDGbOHzQ6RSTMOAwPjBEZyyGvL3by398DOGBgYWzPaEYe20V8UosutPQwMjO0YPzuNS6mOsNJkAAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+<script src="/js/main.js?v=1.7.2"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="/js/search.js?v=1.7.2" async></script>
+
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = 'S1eke\'s Blog';
+            clearTimeout(titleTime);
+        } else {
+            document.title = 'S1eke\'s Blog';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>
