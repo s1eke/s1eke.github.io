@@ -128,6 +128,21 @@ gitalk: false
 #  client_id: 
 #  client_secret: 
 
+giscus: 
+  repo: s1eke/s1eke.github.io
+  repoId: R_kgDOLe05uQ
+  category: Announcements
+  categoryId: DIC_kwDOLe05uc4Cf1-1
+  mapping: pathname
+  strict: 0
+  reactionEnabled: 1
+  emitMetadata: 0
+  inputPosition: top
+  theme: light_protanopia
+  lang: zh-CN
+  loading: lazy
+
+
 # Valine Comment system. https://valine.js.org
 valine:
   enable: false # 如果你想使用valine，请将值设置为 true
