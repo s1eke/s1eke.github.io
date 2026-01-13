@@ -29,22 +29,22 @@
 <meta property="og:description" content="部署 Ceph 存储集群前置条件 管理节点下需要将所有节点对应的主机名和 IP 写入 hosts 方便批量操作（所有节点需要用不同的主机名） 所有节点配置免密登录方便管理节点使用 ceph-deploy 部署(用户需要有sudo权限，并且是NOPASSWD)  重置环境（仅在原环境上操作需要使用）该操作需要在集群的管理节点的 ceph-deploy 目录下操作。  删除所有节点的ceph软件">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-07-02T18:16:33.000Z">
-<meta property="article:modified_time" content="2024-06-04T10:08:06.247Z">
+<meta property="article:modified_time" content="2026-01-13T07:38:00.576Z">
 <meta property="article:author" content="Sean Fang">
-<meta property="article:tag" content="Linux">
 <meta property="article:tag" content="Ceph">
+<meta property="article:tag" content="Linux">
 <meta name="twitter:card" content="summary">
     
         <link rel="alternate" type="application/atom+xml" title="S1eke&#39;s Blog" href="/atom.xml">
     
     <link rel="shortcut icon" href="/img/favicon.png">
-    <link rel="stylesheet" href="/css/style.css?v=1.7.2">
+    <link rel="stylesheet" href="/css/style.css?v=1.8.0">
     <script>window.lazyScripts=[]</script>
 
     <!-- custom head -->
     
 
-<meta name="generator" content="Hexo 7.1.1"></head>
+<meta name="generator" content="Hexo 8.1.1"></head>
 
 <body>
     <div id="loading" class="active"></div>
@@ -201,11 +201,11 @@
 <h2 id="重置环境（仅在原环境上操作需要使用）"><a href="#重置环境（仅在原环境上操作需要使用）" class="headerlink" title="重置环境（仅在原环境上操作需要使用）"></a>重置环境（仅在原环境上操作需要使用）</h2><p>该操作需要在集群的管理节点的 ceph-deploy 目录下操作。</p>
 <ol>
 <li><p>删除所有节点的ceph软件 </p>
-<pre><code> $ ceph-deploy purge &#123;ceph-node&#125; [&#123;ceph-node&#125;]
+<pre><code> $ ceph-deploy purge {ceph-node} [{ceph-node}]
 </code></pre>
 </li>
 <li><p>删除所有节点的ceph软件数据</p>
-<pre><code> $ ceph-deploy purgedata &#123;ceph-node&#125; [&#123;ceph-node&#125;]
+<pre><code> $ ceph-deploy purgedata {ceph-node} [{ceph-node}]
 </code></pre>
 </li>
 <li><p>删除所有节点的keys</p>
@@ -247,7 +247,7 @@
 </code></pre>
 <h4 id="为监控节点部署管理器守护程序"><a href="#为监控节点部署管理器守护程序" class="headerlink" title="为监控节点部署管理器守护程序"></a>为监控节点部署管理器守护程序</h4><pre><code># ceph-deploy mgr create 所有监控节点
 </code></pre>
-<h4 id="创建-OSD"><a href="#创建-OSD" class="headerlink" title="创建 OSD"></a>创建 OSD</h4><pre><code># ceph-deploy osd create --data &#123;device&#125; &#123;ceph-node&#125;
+<h4 id="创建-OSD"><a href="#创建-OSD" class="headerlink" title="创建 OSD"></a>创建 OSD</h4><pre><code># ceph-deploy osd create --data {device} {ceph-node}
 
 示例：ceph-deploy osd create --data /dev/sdb node30
 </code></pre>
@@ -258,7 +258,7 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">vm@Lotus-Master ~/my-cluster % sudo ceph -s</span><br><span class="line">  cluster:</span><br><span class="line">    id:     8d24cae1-07a9-4c3c-a74c-d0b56e4ad243</span><br><span class="line">    health: HEALTH_OK</span><br><span class="line"></span><br><span class="line">  services:</span><br><span class="line">    mon: 2 daemons, quorum node3,node4 (age 2m)</span><br><span class="line">    mgr: node7(active, since 43m), standbys: node8, node9, node10, node11, node12, node15, node16, node6, node14, node18, Lotus-Master, node3, node5, node4</span><br><span class="line">    osd: 14 osds: 14 up (since 2m), 14 in (since 15m)</span><br><span class="line"></span><br><span class="line">  data:</span><br><span class="line">    pools:   0 pools, 0 pgs</span><br><span class="line">    objects: 0 objects, 0 B</span><br><span class="line">    usage:   14 GiB used, 114 TiB / 114 TiB avail</span><br><span class="line">    pgs:</span><br></pre></td></tr></table></figure>
 
 <hr>
-<h2 id="创建-Cephfs"><a href="#创建-Cephfs" class="headerlink" title="创建 Cephfs"></a>创建 Cephfs</h2><h3 id="创建-mds-节点"><a href="#创建-mds-节点" class="headerlink" title="创建 mds 节点"></a>创建 mds 节点</h3><pre><code># ceph-deploy mds create &#123;ceph-node&#125;
+<h2 id="创建-Cephfs"><a href="#创建-Cephfs" class="headerlink" title="创建 Cephfs"></a>创建 Cephfs</h2><h3 id="创建-mds-节点"><a href="#创建-mds-节点" class="headerlink" title="创建 mds 节点"></a>创建 mds 节点</h3><pre><code># ceph-deploy mds create {ceph-node}
 </code></pre>
 <p>CephFS 中的所有元数据操作都通过 mds 进行，因此至少需要一台 mds 节点。为了防止单点故障，在这里可以配置多个mds 服务器。默认的</p>
 <h3 id="创建-pool"><a href="#创建-pool" class="headerlink" title="创建 pool"></a>创建 pool</h3><pre><code># ceph osd pool create cephfs_data 2048
@@ -342,7 +342,7 @@
     <div class="content">
         
 <span class="post-time">
-    最后更新时间：<time datetime="2024-06-04T10:08:06.247Z" itemprop="dateUpdated">2024-06-04 18:08:06</time>
+    最后更新时间：<time datetime="2026-01-13T07:38:00.576Z" itemprop="dateUpdated">2026-01-13 15:38:00</time>
 </span><br>
 
 
@@ -511,7 +511,7 @@
         </p>
     </div>
     <div class="bottom">
-        <p><span>Sean Fang &copy; 2015 - 2024</span>
+        <p><span>Sean Fang &copy; 2015 - 2026</span>
             <span>
                 
                 Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
@@ -571,15 +571,14 @@
 
 
 
-    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
-<script>
-var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+    <script>
+    var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
 
 
 </script>
-<script src="/js/main.js?v=1.7.2"></script>
+<script src="/js/main.js?v=1.8.0"></script>
 
-
+    
 <div class="search-panel" id="search-panel">
     <ul class="search-result" id="search-result"></ul>
 </div>
@@ -597,17 +596,17 @@ var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
 </li>
 </template>
 
-<script src="/js/search.js?v=1.7.2" async></script>
+        <script src="/js/search.js?v=1.8.0" async></script>
+        
+
+            
 
 
+                
+                    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    
 
-
-
-
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-
-
-
+                        
 <script>
 (function() {
     var OriginTitile = document.title, titleTime;
@@ -624,7 +623,6 @@ var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
     });
 })();
 </script>
-
 
 
 </body>

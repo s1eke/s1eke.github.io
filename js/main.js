@@ -15,13 +15,13 @@
         forEach = Array.prototype.forEach,
         even =
             "ontouchstart" in w &&
-            /Mobile|Android|iOS|iPhone|iPad|iPod|Windows Phone|KFAPWI/i.test(
-                navigator.userAgent
-            )
+                /Mobile|Android|iOS|iPhone|iPad|iPod|Windows Phone|KFAPWI/i.test(
+                    navigator.userAgent
+                )
                 ? "touchstart"
                 : "click",
         isWX = /micromessenger/i.test(navigator.userAgent),
-        noop = function () {},
+        noop = function () { },
         offset = function (el) {
             var x = el.offsetLeft,
                 y = el.offsetTop;
@@ -585,13 +585,78 @@
         return g;
     }, w.BLOG);
 
-    if (w.Waves) {
-        Waves.init();
-        Waves.attach(".global-share li", ["waves-block"]);
-        Waves.attach(".article-tag-list-link, #page-nav a, #page-nav span", [
-            "waves-button",
-        ]);
-    } else {
-        console.error("Waves loading failed.");
-    }
+    // Custom Waves ripple effect implementation (replaces external Waves.js)
+    var Ripple = {
+        // Create ripple element
+        createRipple: function (e) {
+            var el = e.currentTarget;
+            var rect = el.getBoundingClientRect();
+            var ripple = d.createElement('span');
+            var size = Math.max(rect.width, rect.height) * 2;
+
+            ripple.className = 'waves-ripple';
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+            ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+
+            el.appendChild(ripple);
+
+            // Trigger animation
+            setTimeout(function () {
+                ripple.style.opacity = '1';
+                ripple.style.transform = 'scale(1)';
+            }, 0);
+
+            // Remove ripple after animation
+            setTimeout(function () {
+                ripple.style.opacity = '0';
+                setTimeout(function () {
+                    if (ripple.parentNode) {
+                        ripple.parentNode.removeChild(ripple);
+                    }
+                }, 300);
+            }, 400);
+        },
+
+        // Attach ripple effect to elements
+        attach: function (selector, classes) {
+            var elements = d.querySelectorAll(selector);
+            forEach.call(elements, function (el) {
+                // Add classes if provided
+                if (classes && classes.length) {
+                    classes.forEach(function (cls) {
+                        el.classList.add(cls);
+                    });
+                }
+                // Ensure waves-effect class is present
+                if (!el.classList.contains('waves-effect')) {
+                    el.classList.add('waves-effect');
+                }
+            });
+        },
+
+        // Initialize ripple effect on all waves-effect elements
+        init: function () {
+            d.addEventListener(even, function (e) {
+                var target = e.target;
+                // Find the closest waves-effect element
+                while (target && target !== d) {
+                    if (target.classList && target.classList.contains('waves-effect')) {
+                        Ripple.createRipple({
+                            currentTarget: target,
+                            clientX: e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0),
+                            clientY: e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0)
+                        });
+                        break;
+                    }
+                    target = target.parentNode;
+                }
+            });
+        }
+    };
+
+    // Initialize custom ripple effect
+    Ripple.init();
+    Ripple.attach(".global-share li", ["waves-block"]);
+    Ripple.attach(".article-tag-list-link, #page-nav a, #page-nav span", ["waves-button"]);
 })(window, document);

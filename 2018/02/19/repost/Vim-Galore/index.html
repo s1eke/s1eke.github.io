@@ -29,7 +29,7 @@
 <meta property="og:description" content="Vim 从入门到精通 本文主要在翻译 mhinz&#x2F;vim-galore的基础添加了一些我在使用 Vim 及开发 Vim 插件的过程中积累的一些知识和常用插件列表。  Vim 中文同步聊天室  telegram： @VimHub gitter: vim-china&#x2F;Lobby IRC: #vim-china    简介什么是 Vim？Vim 是一个历史悠久的文本编辑器，可以追溯到">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2018-02-19T06:49:13.000Z">
-<meta property="article:modified_time" content="2024-06-04T10:08:06.251Z">
+<meta property="article:modified_time" content="2026-01-13T07:38:00.579Z">
 <meta property="article:author" content="Sean Fang">
 <meta property="article:tag" content="Vim">
 <meta name="twitter:card" content="summary">
@@ -37,13 +37,13 @@
         <link rel="alternate" type="application/atom+xml" title="S1eke&#39;s Blog" href="/atom.xml">
     
     <link rel="shortcut icon" href="/img/favicon.png">
-    <link rel="stylesheet" href="/css/style.css?v=1.7.2">
+    <link rel="stylesheet" href="/css/style.css?v=1.8.0">
     <script>window.lazyScripts=[]</script>
 
     <!-- custom head -->
     
 
-<meta name="generator" content="Hexo 7.1.1"></head>
+<meta name="generator" content="Hexo 8.1.1"></head>
 
 <body>
     <div id="loading" class="active"></div>
@@ -619,11 +619,11 @@
 <td>当前句子的结尾</td>
 </tr>
 <tr>
-<td><code>&#39;&#123;</code> 与 <code>`&#123;</code></td>
+<td><code>&#39;{</code> 与 <code>`{</code></td>
 <td>当前段落的开头</td>
 </tr>
 <tr>
-<td><code>&#39;&#125;</code> 与 <code>`&#125;</code></td>
+<td><code>&#39;}</code> 与 <code>`}</code></td>
 <td>当前段落的结尾</td>
 </tr>
 </tbody></table>
@@ -722,7 +722,7 @@
 <p>返回主目录 <a href="#%E5%9F%BA%E7%A1%80">:arrow_heading_up:</a></p>
 <h2 id="自动命令"><a href="#自动命令" class="headerlink" title="自动命令"></a>自动命令</h2><p>在特定的情况下，Vim 会传出事件。如果你想针对这些事件执行回调方法，那么就需要用到自动命令这个功能。</p>
 <p>如果没有了自动命令，那你基本上是用不了 Vim 的。自动命令一直都在执行，只是很多时候你没有注意到。不信的话，可以执行命令 <code>:au</code> ，不要被结果吓到，这些是当前有效的所有自动命令。</p>
-<p>请使用 <code>:h &#123;event&#125;</code> 来查看 Vim 中所有事件的列表，你也可以参考 <code>:h autocmd-events-abc</code> 来获取关于事件的更多帮助。</p>
+<p>请使用 <code>:h {event}</code> 来查看 Vim 中所有事件的列表，你也可以参考 <code>:h autocmd-events-abc</code> 来获取关于事件的更多帮助。</p>
 <p>一个很常用的例子，就是针对文件类型执行某些设置：</p>
 <figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">autocmd</span> FileType <span class="keyword">ruby</span> <span class="keyword">setlocal</span> <span class="built_in">shiftwidth</span>=<span class="number">2</span> softtabstop=<span class="number">2</span> comments-=:#</span><br></pre></td></tr></table></figure>
 
@@ -738,7 +738,7 @@
 <p>返回主目录 <a href="#%E5%9F%BA%E7%A1%80">:arrow_heading_up:</a></p>
 <h2 id="变更历史，跳转历史"><a href="#变更历史，跳转历史" class="headerlink" title="变更历史，跳转历史"></a>变更历史，跳转历史</h2><p>在 Vim 中，用户最近 100 次的文字改动都会被保存在<strong>变更历史</strong>中。如果在同一行有多个小改动，那么 Vim 会把它们合并成一个。尽管内容改动会合并，但作用的位置还是会只记录下最后一次改动的位置。</p>
 <p>在你移动光标或跳转的时候，每一次的移动或跳转前的位置会被记录到<strong>跳转历史</strong>中。类似地，跳转历史也可以最多保存 100 条记录。对于每个窗口，跳转记录是独立的。但当你分离窗口时（比如使用 <code>:split</code> 命令），跳转历史会被复制过去。</p>
-<p>Vim 中的跳转命令，包括 <code>&#39;</code>、<code>`</code>、<code>G</code>、<code>/</code>、<code>?</code>、<code>n</code>、<code>N</code>、<code>%</code>、<code>(</code>、<code>)</code>、<code>[[</code>、<code>]]</code>、<code>&#123;</code>、<code>&#125;</code>、<code>:s</code>、<code>:tag</code>、<code>L</code>、<code>M</code>、<code>H</code> 以及开始编辑一个新文件的命令。</p>
+<p>Vim 中的跳转命令，包括 <code>&#39;</code>、<code>`</code>、<code>G</code>、<code>/</code>、<code>?</code>、<code>n</code>、<code>N</code>、<code>%</code>、<code>(</code>、<code>)</code>、<code>[[</code>、<code>]]</code>、<code>{</code>、<code>}</code>、<code>:s</code>、<code>:tag</code>、<code>L</code>、<code>M</code>、<code>H</code> 以及开始编辑一个新文件的命令。</p>
 <table>
 <thead>
 <tr>
@@ -763,7 +763,7 @@
 </tbody></table>
 <p>如果你执行第二列的命令显示所有条目，这时 Vim 会用 <code>&gt;</code> 标记来为你指示当前位置。通常这个标记位于 1 的下方，也就代表最后一次的位置。</p>
 <p>如果你希望关闭 Vim 之后还保留这些条目，请参阅 <code>:h viminfo-&#39;</code> 来获取更多帮助。</p>
-<p><strong>注意</strong>：上面提到过，最后一次跳转前的位置也会记录在<a href="#%E6%A0%87%E6%B3%A8">标注</a>中，也可以通过连按 <kbd>``</kbd> 或 <kbd>''</kbd> 跳转到那个位置</p>
+<p><strong>注意</strong>：上面提到过，最后一次跳转前的位置也会记录在<a href="#%E6%A0%87%E6%B3%A8">标注</a>中，也可以通过连按 <kbd>``</kbd> 或 <kbd>&#39;&#39;</kbd> 跳转到那个位置</p>
 <p>请参阅以下两个命令来获取更多帮助：</p>
 <figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">:h changelist</span><br><span class="line">:h jumplist</span><br></pre></td></tr></table></figure>
 
@@ -1243,7 +1243,7 @@ Program B：从Program A接收数据并插入到窗口中
 <h3 id="1-构建数据库"><a href="#1-构建数据库" class="headerlink" title="1. 构建数据库"></a>1. 构建数据库</h3><p>在你项目的根目录执行下面的命令：</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ cscope -bqR</span><br></pre></td></tr></table></figure>
 
-<p>这条命令会在当前目录下创建三个文件：<code>cscope&#123;,.in,.po&#125;.out</code> 。把它们想象成你的数据库。</p>
+<p>这条命令会在当前目录下创建三个文件：<code>cscope{,.in,.po}.out</code> 。把它们想象成你的数据库。</p>
 <p>不幸的时 <code>cscope</code> 默认只分析 <code>*.[c|h|y|l]</code> 文件。如果你想在 Java 项目中使用 cscope ，需要这样做：</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ find . -name <span class="string">&quot;*.java&quot;</span> &gt; cscope.files</span><br><span class="line">$ cscope -bq</span><br></pre></td></tr></table></figure>
 
@@ -1302,7 +1302,7 @@ Program B：从Program A接收数据并插入到窗口中
 
 <p>所以 <code>:tag</code> （或 <code>&lt;c-]&gt;</code>）跳转到标签定义的文件，而 <code>:cstag</code> 可以达到同样的目的，同时还会打开 cscope 的数据库连接。<code>&#39;cscopetag&#39;</code> 选项使得 <code>:tag</code> 命令自动的像 <code>:cstag</code> 一样工作。这在你已经使用了基于标签的映射时会非常方便。</p>
 <p>帮助文档：<code>:h cscope</code></p>
-<h2 id="MatchIt"><a href="#MatchIt" class="headerlink" title="MatchIt"></a>MatchIt</h2><p>由于 Vim 是用 C 语言编写的，因此许多功能都假设使用类似 C 语言的语法。默认情况下，如果你的光标在 <code>&#123;</code> 或 <code>#endif</code> , 就可以使用 <code>%</code> 跳转到与之匹配的 <code>&#125;</code> 或 <code>#ifdef</code>。</p>
+<h2 id="MatchIt"><a href="#MatchIt" class="headerlink" title="MatchIt"></a>MatchIt</h2><p>由于 Vim 是用 C 语言编写的，因此许多功能都假设使用类似 C 语言的语法。默认情况下，如果你的光标在 <code>{</code> 或 <code>#endif</code> , 就可以使用 <code>%</code> 跳转到与之匹配的 <code>}</code> 或 <code>#ifdef</code>。</p>
 <p>Vim 自带了一个名为 matchit.vim 的插件，但是默认没有启用。启用后可以用 <code>%</code> 在 HTML 相匹配的标签或 VimL 的 if&#x2F;else&#x2F;endif 块之间进行跳转，它还带来了一些新的命令。</p>
 <h3 id="在-Vim-8-中安装"><a href="#在-Vim-8-中安装" class="headerlink" title="在 Vim 8 中安装"></a>在 Vim 8 中安装</h3><figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&quot; vimrc</span></span><br><span class="line">packadd! matchit</span><br></pre></td></tr></table></figure>
 
@@ -1361,9 +1361,9 @@ Program B：从Program A接收数据并插入到窗口中
 <p>在录制宏的时候，我经常用这个来更改拼写错误。</p>
 <figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">nnoremap</span> <span class="symbol">&lt;leader&gt;</span><span class="keyword">m</span>  :<span class="symbol">&lt;c-u&gt;</span><span class="symbol">&lt;c-r&gt;</span><span class="symbol">&lt;c-r&gt;</span>=<span class="string">&#x27;let @&#x27;</span>. <span class="variable">v:register</span> .<span class="string">&#x27; = &#x27;</span>. <span class="built_in">string</span>(<span class="built_in">getreg</span>(<span class="variable">v:register</span>))<span class="symbol">&lt;cr&gt;</span><span class="symbol">&lt;c-f&gt;</span><span class="symbol">&lt;left&gt;</span></span><br></pre></td></tr></table></figure>
 
-<p>只需要连续按下 <kbd>leader</kbd> <kbd>m</kbd> 或者 <kbd>"</kbd> <kbd>leader</kbd> <kbd>m</kbd> 就可以调用了。</p>
+<p>只需要连续按下 <kbd>leader</kbd> <kbd>m</kbd> 或者 <kbd>&quot;</kbd> <kbd>leader</kbd> <kbd>m</kbd> 就可以调用了。</p>
 <p>请注意，这里之所以要写成 <code>&lt;c-r&gt;&lt;c-r&gt;</code> 是为了确保 <code>&lt;c-r&gt;</code> 执行了。请参阅 <code>:h c_^R^R</code></p>
-<h2 id="快速跳转到源-头-文件"><a href="#快速跳转到源-头-文件" class="headerlink" title="快速跳转到源(头)文件"></a>快速跳转到源(头)文件</h2><p>这个技巧可以用在多种文件类型中。当你从源文件或者头文件中切换到其他文件的时候，这个技巧可以设置「文件标记」（请参阅 <code>:h marks</code>），然后你就可以通过连续按下 <kbd>'</kbd> <kbd>C</kbd> 或者 <kbd>'</kbd> <kbd>H</kbd> 快速跳转回去（请参阅 <code>:h &#39;A</code>）。</p>
+<h2 id="快速跳转到源-头-文件"><a href="#快速跳转到源-头-文件" class="headerlink" title="快速跳转到源(头)文件"></a>快速跳转到源(头)文件</h2><p>这个技巧可以用在多种文件类型中。当你从源文件或者头文件中切换到其他文件的时候，这个技巧可以设置「文件标记」（请参阅 <code>:h marks</code>），然后你就可以通过连续按下 <kbd>&#39;</kbd> <kbd>C</kbd> 或者 <kbd>&#39;</kbd> <kbd>H</kbd> 快速跳转回去（请参阅 <code>:h &#39;A</code>）。</p>
 <figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">autocmd</span> BufLeave *.&#123;<span class="keyword">c</span>,cpp&#125; <span class="keyword">mark</span> C</span><br><span class="line"><span class="keyword">autocmd</span> BufLeave *.h       <span class="keyword">mark</span> H</span><br></pre></td></tr></table></figure>
 
 <p><strong>注意</strong>：由于这个标记是设置在 viminfo 文件中，因此请先确认 <code>:set viminfo?</code> 中包含了 <code>:h viminfo-&#39;</code>。</p>
@@ -1376,7 +1376,7 @@ Program B：从Program A接收数据并插入到窗口中
 <p>原理很简单，就是让 Vim 在进入和离开插入模式的时候，输出一些序列，请参考 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Escape_sequence">escape sequence</a>。Vim 与终端之间的中间层，比如 <a target="_blank" rel="noopener" href="https://tmux.github.io/">tmux</a> 会处理并执行上面的代码。</p>
 <p>但上面这个还是有一个缺点的。终端环境的内部原理不尽相同，对于序列的处理方式也稍有不同。因此，上面的代码可能无法在你的环境中运行。甚至，你的运行环境也有可能不支持其他光标形状，请参阅你的 Vim 运行环境的文档。</p>
 <p>好消息是，上面这个代码，可以在 iTerm2 中完美运行。</p>
-<h2 id="防止水平滑动的时候失去选择"><a href="#防止水平滑动的时候失去选择" class="headerlink" title="防止水平滑动的时候失去选择"></a>防止水平滑动的时候失去选择</h2><p>如果你选中了一行或多行，那么你可以用 <kbd>&lt;</kbd> 或 <kbd>></kbd> 来调整他们的缩进。但在调整之后就不会保持选中状态了。</p>
+<h2 id="防止水平滑动的时候失去选择"><a href="#防止水平滑动的时候失去选择" class="headerlink" title="防止水平滑动的时候失去选择"></a>防止水平滑动的时候失去选择</h2><p>如果你选中了一行或多行，那么你可以用 <kbd>&lt;</kbd> 或 <kbd>&gt;</kbd> 来调整他们的缩进。但在调整之后就不会保持选中状态了。</p>
 <p>你可以连续按下 <kbd>g</kbd> <kbd>v</kbd> 来重新选中他们，请参考 <code>:h gv</code>。因此，你可以这样来配置映射：</p>
 <figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">xnoremap</span> &lt;  &lt;<span class="keyword">gv</span></span><br><span class="line"><span class="keyword">xnoremap</span> &gt;  &gt;<span class="keyword">gv</span></span><br></pre></td></tr></table></figure>
 
@@ -1611,7 +1611,7 @@ Program B：从Program A接收数据并插入到窗口中
     <div class="content">
         
 <span class="post-time">
-    最后更新时间：<time datetime="2024-06-04T10:08:06.251Z" itemprop="dateUpdated">2024-06-04 18:08:06</time>
+    最后更新时间：<time datetime="2026-01-13T07:38:00.579Z" itemprop="dateUpdated">2026-01-13 15:38:00</time>
 </span><br>
 
 
@@ -1780,7 +1780,7 @@ Program B：从Program A接收数据并插入到窗口中
         </p>
     </div>
     <div class="bottom">
-        <p><span>Sean Fang &copy; 2015 - 2024</span>
+        <p><span>Sean Fang &copy; 2015 - 2026</span>
             <span>
                 
                 Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
@@ -1840,15 +1840,14 @@ Program B：从Program A接收数据并插入到窗口中
 
 
 
-    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
-<script>
-var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+    <script>
+    var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
 
 
 </script>
-<script src="/js/main.js?v=1.7.2"></script>
+<script src="/js/main.js?v=1.8.0"></script>
 
-
+    
 <div class="search-panel" id="search-panel">
     <ul class="search-result" id="search-result"></ul>
 </div>
@@ -1866,17 +1865,17 @@ var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
 </li>
 </template>
 
-<script src="/js/search.js?v=1.7.2" async></script>
+        <script src="/js/search.js?v=1.8.0" async></script>
+        
+
+            
 
 
+                
+                    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    
 
-
-
-
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-
-
-
+                        
 <script>
 (function() {
     var OriginTitile = document.title, titleTime;
@@ -1893,7 +1892,6 @@ var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
     });
 })();
 </script>
-
 
 
 </body>

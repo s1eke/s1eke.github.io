@@ -2,26 +2,31 @@
   font-family: "Roboto";
   src: local('Roboto Thin'), local('Roboto-Thin'), url("fonts/roboto/Roboto-Thin.woff2") format("woff2"), url("fonts/roboto/Roboto-Thin.woff") format("woff"), url("fonts/roboto/Roboto-Thin.ttf") format("truetype");
   font-weight: 200;
+  font-display: swap;
 }
 @font-face {
   font-family: "Roboto";
   src: local('Roboto Light'), local('Roboto-Light'), url("fonts/roboto/Roboto-Light.woff2") format("woff2"), url("fonts/roboto/Roboto-Light.woff") format("woff"), url("fonts/roboto/Roboto-Light.ttf") format("truetype");
   font-weight: 300;
+  font-display: swap;
 }
 @font-face {
   font-family: "Roboto";
   src: local('Roboto Regular'), local('Roboto-Regular'), url("fonts/roboto/Roboto-Regular.woff2") format("woff2"), url("fonts/roboto/Roboto-Regular.woff") format("woff"), url("fonts/roboto/Roboto-Regular.ttf") format("truetype");
   font-weight: 400;
+  font-display: swap;
 }
 @font-face {
   font-family: "Roboto";
   src: local('Roboto Medium'), local('Roboto-Medium'), url("fonts/roboto/Roboto-Medium.woff2") format("woff2"), url("fonts/roboto/Roboto-Medium.woff") format("woff"), url("fonts/roboto/Roboto-Medium.ttf") format("truetype");
   font-weight: 500;
+  font-display: swap;
 }
 @font-face {
   font-family: "Roboto";
   src: local('Roboto Bold'), local('Roboto-Bold'), url("fonts/roboto/Roboto-Bold.woff2") format("woff2"), url("fonts/roboto/Roboto-Bold.woff") format("woff"), url("fonts/roboto/Roboto-Bold.ttf") format("truetype");
   font-weight: 700;
+  font-display: swap;
 }
 /*!
  *  Font Awesome 4.6.3 by @davegandy - http://fontawesome.io - @fontawesome
@@ -34,6 +39,7 @@
   src: url('fonts/fontawesome/fontawesome-webfont.woff2') format('woff2'), url('fonts/fontawesome/fontawesome-webfont.woff') format('woff'), url('fonts/fontawesome/fontawesome-webfont.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 .icon {
   display: inline-block;
@@ -2243,6 +2249,8 @@ html {
 body {
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
   -webkit-overflow-scrolling: touch;
+  width: 100%;
+  overflow-x: hidden;
 }
 html,
 body {
@@ -2620,20 +2628,16 @@ hr,
 .waves-effect .waves-ripple {
   position: absolute;
   border-radius: 50%;
-  width: 100px;
-  height: 100px;
-  margin-top: -50px;
-  margin-left: -50px;
   opacity: 0;
   background: rgba(0, 0, 0, 0.2);
   background: -webkit-radial-gradient(rgba(0, 0, 0, 0.2) 0, rgba(0, 0, 0, 0.3) 40%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.5) 60%, rgba(255, 255, 255, 0) 70%);
   background: radial-gradient(rgba(0, 0, 0, 0.2) 0, rgba(0, 0, 0, 0.3) 40%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.5) 60%, rgba(255, 255, 255, 0) 70%);
-  -webkit-transition: all 0.5s ease-out;
-  transition: all 0.5s ease-out;
+  -webkit-transition: transform 0.5s ease-out;
+  transition: transform 0.5s ease-out;
   -webkit-transition-property: -webkit-transform, opacity;
   transition-property: transform, opacity;
-  -webkit-transform: scale(0) translate(0, 0);
-  transform: scale(0) translate(0, 0);
+  -webkit-transform: scale(0);
+  transform: scale(0);
   pointer-events: none;
 }
 .waves-effect.waves-light .waves-ripple {
@@ -2755,8 +2759,12 @@ hr,
   background-size: 100% 100%;
 }
 #menu .brand {
-  padding: 40px 20px 2em;
+  min-height: 244px;
+  padding: 0 20px 48px;
   background: rgba(63, 81, 181, 0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 #menu .avatar {
   display: block;
@@ -2928,8 +2936,9 @@ a[title="站长统计"] {
     overflow-x: hidden;
   }
   #menu .brand {
+    min-height: 188px;
     padding-top: 20px;
-    padding-bottom: 1em;
+    padding-bottom: 20px;
   }
   #menu .nav {
     line-height: 36px;
@@ -2979,7 +2988,7 @@ a[title="站长统计"] {
   white-space: nowrap;
 }
 .content-header {
-  min-height: 210px;
+  min-height: 244px;
   margin-left: -240px;
   padding: 104px 16px 48px 256px;
   color: #fff;
