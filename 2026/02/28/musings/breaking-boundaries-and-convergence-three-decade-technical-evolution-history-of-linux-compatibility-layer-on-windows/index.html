@@ -28,14 +28,22 @@
 <meta property="og:site_name" content="S1eke&#39;s Blog">
 <meta property="og:description" content="摘要：Windows Subsystem for Linux（WSL）是 Microsoft 在 Windows 操作系统上提供原生 Linux 兼容性的技术方案。本文系统性地回顾了从 Windows NT 时代的 POSIX 子系统，到 Windows Services for UNIX（SFU）&#x2F;Interix，再到 WSL 1 系统调用翻译层和 WSL 2 轻量级虚拟机的完整技术">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog.jugg.xyz/img/breaking-boundaries-and-convergence-three-decade-technical-evolution-history-of-linux-compatibility-layer-on-windows/nt-architecture.svg">
+<meta property="og:image" content="https://blog.jugg.xyz/img/breaking-boundaries-and-convergence-three-decade-technical-evolution-history-of-linux-compatibility-layer-on-windows/interix-architecture.svg">
+<meta property="og:image" content="https://blog.jugg.xyz/img/breaking-boundaries-and-convergence-three-decade-technical-evolution-history-of-linux-compatibility-layer-on-windows/wsl1-syscall-flow.svg">
+<meta property="og:image" content="https://blog.jugg.xyz/img/breaking-boundaries-and-convergence-three-decade-technical-evolution-history-of-linux-compatibility-layer-on-windows/wsl2-vm-architecture.svg">
+<meta property="og:image" content="https://blog.jugg.xyz/img/breaking-boundaries-and-convergence-three-decade-technical-evolution-history-of-linux-compatibility-layer-on-windows/wsl2-nat-network.svg">
+<meta property="og:image" content="https://blog.jugg.xyz/img/breaking-boundaries-and-convergence-three-decade-technical-evolution-history-of-linux-compatibility-layer-on-windows/wslg-architecture.svg">
+<meta property="og:image" content="https://blog.jugg.xyz/img/breaking-boundaries-and-convergence-three-decade-technical-evolution-history-of-linux-compatibility-layer-on-windows/timeline-evolution.svg">
 <meta property="article:published_time" content="2026-02-28T06:58:19.000Z">
-<meta property="article:modified_time" content="2026-02-28T07:14:07.299Z">
+<meta property="article:modified_time" content="2026-02-28T10:34:35.856Z">
 <meta property="article:author" content="Sean Fang">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="WSL">
 <meta property="article:tag" content="Windows">
 <meta property="article:tag" content="musings">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog.jugg.xyz/img/breaking-boundaries-and-convergence-three-decade-technical-evolution-history-of-linux-compatibility-layer-on-windows/nt-architecture.svg">
     
         <link rel="alternate" type="application/atom+xml" title="S1eke&#39;s Blog" href="/atom.xml">
     
@@ -221,7 +229,13 @@
 <li><strong>硬件抽象层（HAL）</strong>：将硬件差异抽象化，实现内核的跨平台可移植性</li>
 </ul>
 <p>这些内核模式组件被编译进单一的 <code>ntoskrnl.exe</code> 映像文件中，它们之间通过函数调用实现高效通信，而非采用纯微内核架构中进程间通信的方式。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────────────────────────────────────────────┐</span><br><span class="line">│                    用户模式 (User Mode)               │</span><br><span class="line">│  ┌──────────┐  ┌──────────┐  ┌──────────┐           │</span><br><span class="line">│  │ Win32    │  │ POSIX    │  │ OS/2     │  ← 环境子系统│</span><br><span class="line">│  │ 子系统   │  │ 子系统   │  │ 子系统   │           │</span><br><span class="line">│  └────┬─────┘  └────┬─────┘  └────┬─────┘           │</span><br><span class="line">│       │             │             │                  │</span><br><span class="line">│  ┌────┴─────────────┴─────────────┴────┐             │</span><br><span class="line">│  │     子系统 DLL (ntdll.dll 等)        │             │</span><br><span class="line">│  └────────────────┬────────────────────┘             │</span><br><span class="line">├───────────────────┼─────────────────────────────────┤</span><br><span class="line">│                   │        内核模式 (Kernel Mode)     │</span><br><span class="line">│  ┌────────────────┴────────────────────┐             │</span><br><span class="line">│  │        系统服务分发器                  │             │</span><br><span class="line">│  ├─────────────────────────────────────┤             │</span><br><span class="line">│  │     执行体 (Executive Services)      │             │</span><br><span class="line">│  │  ┌──────┐ ┌────┐ ┌────┐ ┌──────┐   │             │</span><br><span class="line">│  │  │对象  │ │进程│ │I/O │ │安全  │   │             │</span><br><span class="line">│  │  │管理器│ │管理│ │管理│ │监视器│   │             │</span><br><span class="line">│  │  └──────┘ └────┘ └────┘ └──────┘   │             │</span><br><span class="line">│  ├─────────────────────────────────────┤             │</span><br><span class="line">│  │          微内核 (Microkernel)         │             │</span><br><span class="line">│  ├─────────────────────────────────────┤             │</span><br><span class="line">│  │       硬件抽象层 (HAL)               │             │</span><br><span class="line">│  └─────────────────────────────────────┘             │</span><br><span class="line">└─────────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="/img/breaking-boundaries-and-convergence-three-decade-technical-evolution-history-of-linux-compatibility-layer-on-windows/nt-architecture.svg" alt="Windows NT 分层架构" title="">
+                </div>
+                <div class="image-caption">Windows NT 分层架构</div>
+            </figure>
 
 <h3 id="2-2-环境子系统模型"><a href="#2-2-环境子系统模型" class="headerlink" title="2.2 环境子系统模型"></a>2.2 环境子系统模型</h3><p>Windows NT 架构最具前瞻性的设计之一是 <strong>环境子系统（Environment Subsystem）</strong> 模型。该模型允许多个操作系统的 API 层并行运行于用户模式之上，每个子系统实现不同的编程接口集合。用户模式应用程序不直接访问 NT 内核服务，而是通过子系统特定的动态链接库（DLL）进行调用，这些 DLL 将 API 调用翻译为相应的、未公开的 Windows NT 系统服务调用。</p>
 <p>Windows NT 最初设计了三个环境子系统：</p>
@@ -321,7 +335,13 @@
 <h3 id="4-3-Interix-技术架构"><a href="#4-3-Interix-技术架构" class="headerlink" title="4.3 Interix 技术架构"></a>4.3 Interix 技术架构</h3><p>Interix 作为 Windows NT 内核之上的原生环境子系统运行，其技术架构具有以下特点：</p>
 <p><strong>核心运行机制</strong>：</p>
 <p>Interix 与 Win32 子系统并行运行于 Windows NT 内核之上。Unix 应用程序通过 Interix 子系统 DLL 将 POSIX&#x2F;Unix API 调用翻译为 NT 原生系统服务调用。这种原生子系统的设计确保了良好的性能表现，避免了仿真层的额外开销。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────────────────────────────────────┐</span><br><span class="line">│              用户模式应用程序                  │</span><br><span class="line">│  ┌──────────────┐    ┌──────────────┐       │</span><br><span class="line">│  │ Win32 应用    │    │ Unix 应用    │       │</span><br><span class="line">│  └──────┬───────┘    └──────┬───────┘       │</span><br><span class="line">│         │                   │               │</span><br><span class="line">│  ┌──────┴───────┐    ┌──────┴───────┐       │</span><br><span class="line">│  │ Win32 子系统  │    │ Interix 子系统│       │</span><br><span class="line">│  │ (CSRSS.EXE)  │    │ (PSXSS.EXE)  │       │</span><br><span class="line">│  └──────┬───────┘    └──────┬───────┘       │</span><br><span class="line">│         │                   │               │</span><br><span class="line">│  ┌──────┴───────────────────┴───────┐       │</span><br><span class="line">│  │       NT 原生 API (ntdll.dll)     │       │</span><br><span class="line">│  └──────────────┬───────────────────┘       │</span><br><span class="line">├─────────────────┼───────────────────────────┤</span><br><span class="line">│                 │      内核模式              │</span><br><span class="line">│  ┌──────────────┴───────────────────┐       │</span><br><span class="line">│  │      Windows NT 内核              │       │</span><br><span class="line">│  └──────────────────────────────────┘       │</span><br><span class="line">└─────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="/img/breaking-boundaries-and-convergence-three-decade-technical-evolution-history-of-linux-compatibility-layer-on-windows/interix-architecture.svg" alt="Interix 技术架构" title="">
+                </div>
+                <div class="image-caption">Interix 技术架构</div>
+            </figure>
 
 <p><strong>功能特性（Interix 3.5）</strong>：</p>
 <ul>
@@ -361,7 +381,13 @@
 <li><strong><code>lxcore.sys</code></strong>：Linux 内核接口的核心实现驱动（Pico 提供程序驱动）</li>
 </ul>
 <p>这两个驱动程序是 Linux 兼容内核接口的<strong>全新实现（clean-room implementation）</strong>，不包含任何 Linux 内核代码。其系统调用翻译流程如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">Linux 应用程序 (ELF64 Binary)</span><br><span class="line">        │</span><br><span class="line">        │ Linux 系统调用 (syscall)</span><br><span class="line">        ▼</span><br><span class="line">┌───────────────────────┐</span><br><span class="line">│  Pico 进程 (User Mode) │</span><br><span class="line">└───────────┬───────────┘</span><br><span class="line">            │ 系统调用陷入</span><br><span class="line">            ▼</span><br><span class="line">┌───────────────────────┐</span><br><span class="line">│  Windows NT 内核       │ ← 识别为 Pico 进程的系统调用</span><br><span class="line">│  系统服务分发器        │</span><br><span class="line">└───────────┬───────────┘</span><br><span class="line">            │ 转发给 Pico 提供程序</span><br><span class="line">            ▼</span><br><span class="line">┌───────────────────────┐</span><br><span class="line">│  lxcore.sys            │ ← Pico 提供程序驱动</span><br><span class="line">│  (Linux 系统调用翻译)  │</span><br><span class="line">└───────────┬───────────┘</span><br><span class="line">            │</span><br><span class="line">  ┌─────────┴─────────┐</span><br><span class="line">  │                   │</span><br><span class="line">  ▼                   ▼</span><br><span class="line">有等价 NT API       无等价 NT API</span><br><span class="line">→ 调用内部 NT     → 在驱动内部</span><br><span class="line">  内核功能           直接实现</span><br></pre></td></tr></table></figure>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="/img/breaking-boundaries-and-convergence-three-decade-technical-evolution-history-of-linux-compatibility-layer-on-windows/wsl1-syscall-flow.svg" alt="WSL 1 系统调用翻译流程" title="">
+                </div>
+                <div class="image-caption">WSL 1 系统调用翻译流程</div>
+            </figure>
 
 <p><strong>翻译过程的详细步骤</strong>：</p>
 <ol>
@@ -411,7 +437,13 @@
 <li>为 GPU 直通等高级功能提供基础</li>
 </ul>
 <h3 id="6-2-虚拟化架构"><a href="#6-2-虚拟化架构" class="headerlink" title="6.2 虚拟化架构"></a>6.2 虚拟化架构</h3><p>WSL 2 利用 Windows 的 <strong>Virtual Machine Platform</strong>（虚拟机平台）组件——这是 Hyper-V 技术在所有 Windows 版本上可用的子集——来创建和管理轻量级虚拟机。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">┌────────────────────────────────────────────────────┐</span><br><span class="line">│                   Windows 宿主系统                   │</span><br><span class="line">│                                                    │</span><br><span class="line">│  ┌────────────────────────────────────────────┐    │</span><br><span class="line">│  │          WSL 2 轻量级虚拟机                  │    │</span><br><span class="line">│  │  ┌──────────────────────────────────────┐  │    │</span><br><span class="line">│  │  │      Linux 发行版 (Ubuntu 等)          │  │    │</span><br><span class="line">│  │  │  ┌──────────┐  ┌──────────────────┐  │  │    │</span><br><span class="line">│  │  │  │ 用户空间  │  │ systemd (PID 1) │  │  │    │</span><br><span class="line">│  │  │  │ 应用程序  │  │ 服务管理         │  │  │    │</span><br><span class="line">│  │  │  └─────┬────┘  └────────┬─────────┘  │  │    │</span><br><span class="line">│  │  │        │               │             │  │    │</span><br><span class="line">│  │  │  ┌─────┴───────────────┴─────────┐   │  │    │</span><br><span class="line">│  │  │  │     真正的 Linux 内核 (6.6 LTS) │   │  │    │</span><br><span class="line">│  │  │  │   完整的系统调用支持              │   │  │    │</span><br><span class="line">│  │  │  │   cgroups / namespaces / eBPF   │   │  │    │</span><br><span class="line">│  │  │  └───────────────────────────────┘   │  │    │</span><br><span class="line">│  │  └──────────────────────────────────────┘  │    │</span><br><span class="line">│  │                                            │    │</span><br><span class="line">│  │  ┌──────────────────────────────────────┐  │    │</span><br><span class="line">│  │  │    WSL System Distro (CBL-Mariner)    │  │    │</span><br><span class="line">│  │  │    管理层 / 服务协调                    │  │    │</span><br><span class="line">│  │  └──────────────────────────────────────┘  │    │</span><br><span class="line">│  └──────────────────────┬─────────────────────┘    │</span><br><span class="line">│                         │                          │</span><br><span class="line">│  ┌──────────────────────┴─────────────────────┐    │</span><br><span class="line">│  │      Virtual Machine Platform (Hyper-V)     │    │</span><br><span class="line">│  └─────────────────────────────────────────────┘    │</span><br><span class="line">│                                                    │</span><br><span class="line">│  ┌─────────────────────────────────────────────┐    │</span><br><span class="line">│  │           Windows NT 内核                    │    │</span><br><span class="line">│  └─────────────────────────────────────────────┘    │</span><br><span class="line">└────────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="/img/breaking-boundaries-and-convergence-three-decade-technical-evolution-history-of-linux-compatibility-layer-on-windows/wsl2-vm-architecture.svg" alt="WSL 2 轻量级虚拟机架构" title="">
+                </div>
+                <div class="image-caption">WSL 2 轻量级虚拟机架构</div>
+            </figure>
 
 <h3 id="6-3-Linux-内核"><a href="#6-3-Linux-内核" class="headerlink" title="6.3 Linux 内核"></a>6.3 Linux 内核</h3><p>WSL 2 运行的是由 Microsoft 定制调优的真正 Linux 内核，其关键特性包括：</p>
 <ul>
@@ -477,7 +509,13 @@
 </ul>
 <h3 id="6-7-网络架构"><a href="#6-7-网络架构" class="headerlink" title="6.7 网络架构"></a>6.7 网络架构</h3><p>WSL 2 提供两种网络模式：</p>
 <p><strong>NAT 模式（默认）</strong>：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">外部网络</span><br><span class="line">    │</span><br><span class="line">Windows 网络栈</span><br><span class="line">    │</span><br><span class="line">NAT (网络地址转换)</span><br><span class="line">    │</span><br><span class="line">WSL 虚拟网络接口</span><br><span class="line">    │</span><br><span class="line">Linux 网络栈</span><br></pre></td></tr></table></figure>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="/img/breaking-boundaries-and-convergence-three-decade-technical-evolution-history-of-linux-compatibility-layer-on-windows/wsl2-nat-network.svg" alt="WSL 2 NAT 网络模式" title="">
+                </div>
+                <div class="image-caption">WSL 2 NAT 网络模式</div>
+            </figure>
 
 <ul>
 <li>WSL 环境拥有独立的、动态分配的 IP 地址</li>
@@ -585,7 +623,13 @@
 <hr>
 <h2 id="8-WSL-生态系统的现代扩展"><a href="#8-WSL-生态系统的现代扩展" class="headerlink" title="8. WSL 生态系统的现代扩展"></a>8. WSL 生态系统的现代扩展</h2><h3 id="8-1-WSLg：Linux-GUI-应用支持"><a href="#8-1-WSLg：Linux-GUI-应用支持" class="headerlink" title="8.1 WSLg：Linux GUI 应用支持"></a>8.1 WSLg：Linux GUI 应用支持</h3><p><strong>WSLg</strong>（Windows Subsystem for Linux GUI）为 Linux 图形用户界面应用程序提供了原生 Windows 集成支持，消除了手动配置 X Server 的需要。</p>
 <p><strong>架构设计</strong>：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">┌──────────────────────────────────────────────┐</span><br><span class="line">│              Windows 桌面                     │</span><br><span class="line">│  ┌──────────────────────────────────┐        │</span><br><span class="line">│  │  mstsc RDP 客户端                 │        │</span><br><span class="line">│  │  (RAIL/VAIL Shell)               │        │</span><br><span class="line">│  └───────────────┬──────────────────┘        │</span><br><span class="line">│                  │ RDP 虚拟通道               │</span><br><span class="line">├──────────────────┼───────────────────────────┤</span><br><span class="line">│                  │  WSL 2 虚拟机              │</span><br><span class="line">│  ┌───────────────┴──────────────────┐        │</span><br><span class="line">│  │  Weston Compositor                │        │</span><br><span class="line">│  │  (扩展 RDP 后端)                  │        │</span><br><span class="line">│  └───────────────┬──────────────────┘        │</span><br><span class="line">│                  │ Wayland/X11               │</span><br><span class="line">│  ┌───────────────┴──────────────────┐        │</span><br><span class="line">│  │  Linux GUI 应用程序               │        │</span><br><span class="line">│  │  (GIMP, VS Code, Firefox 等)      │        │</span><br><span class="line">│  └──────────────────────────────────┘        │</span><br><span class="line">└──────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="/img/breaking-boundaries-and-convergence-three-decade-technical-evolution-history-of-linux-compatibility-layer-on-windows/wslg-architecture.svg" alt="WSLg 架构" title="">
+                </div>
+                <div class="image-caption">WSLg 架构</div>
+            </figure>
 
 <p>WSLg 的关键技术组件：</p>
 <ul>
@@ -627,7 +671,13 @@
 <h3 id="8-5-开源化"><a href="#8-5-开源化" class="headerlink" title="8.5 开源化"></a>8.5 开源化</h3><p>2025 年 5 月，Microsoft 将 WSL 的大部分代码库以开源软件形式发布，这是 Microsoft 拥抱开源战略的又一重要举措，也标志着 WSL 从封闭产品向开放平台的转型。</p>
 <hr>
 <h2 id="9-未来展望与总结"><a href="#9-未来展望与总结" class="headerlink" title="9. 未来展望与总结"></a>9. 未来展望与总结</h2><h3 id="9-1-技术演进的历史脉络"><a href="#9-1-技术演进的历史脉络" class="headerlink" title="9.1 技术演进的历史脉络"></a>9.1 技术演进的历史脉络</h3><p>从 1993 年的 POSIX 子系统到 2025 年的 WSL 2，Microsoft 在 Windows 平台上的 Unix&#x2F;Linux 兼容性技术经历了四个重要阶段：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">timeline</span><br><span class="line">    title Windows 平台 Unix/Linux 兼容性技术演进</span><br><span class="line">    1993 : POSIX 子系统</span><br><span class="line">         : 最低限度合规</span><br><span class="line">         : Windows NT 3.1</span><br><span class="line">    1999 : SFU / Interix</span><br><span class="line">         : 原生 Unix 子系统</span><br><span class="line">         : 收购 Softway Systems</span><br><span class="line">    2016 : WSL 1</span><br><span class="line">         : 系统调用翻译层</span><br><span class="line">         : Pico 进程架构</span><br><span class="line">    2019 : WSL 2</span><br><span class="line">         : 轻量级虚拟机</span><br><span class="line">         : 真正的 Linux 内核</span><br><span class="line">    2021 : WSLg</span><br><span class="line">         : Linux GUI 应用支持</span><br><span class="line">    2025 : WSL 开源</span><br><span class="line">         : 代码库开放</span><br></pre></td></tr></table></figure>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="/img/breaking-boundaries-and-convergence-three-decade-technical-evolution-history-of-linux-compatibility-layer-on-windows/timeline-evolution.svg" alt="Windows 平台 Unix/Linux 兼容性技术演进" title="">
+                </div>
+                <div class="image-caption">Windows 平台 Unix/Linux 兼容性技术演进</div>
+            </figure>
 
 <p>每个阶段都反映了 Microsoft 对市场需求的回应和技术路线的调整：</p>
 <table>
@@ -699,7 +749,7 @@
     <div class="content">
         
 <span class="post-time">
-    最后更新时间：<time datetime="2026-02-28T07:14:07.299Z" itemprop="dateUpdated">2026-02-28 15:14:07</time>
+    最后更新时间：<time datetime="2026-02-28T10:34:35.856Z" itemprop="dateUpdated">2026-02-28 18:34:35</time>
 </span><br>
 
 

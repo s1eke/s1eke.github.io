@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 710 585" width="710" height="585">
+<defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1e1e1e"/>
+    </marker>
+    <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1971c2"/>
+    </marker>
+    <marker id="arrowhead-purple" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#9c36b5"/>
+    </marker>
+    <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#e03131"/>
+    </marker>
+    <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2f9e44"/>
+    </marker>
+  </defs>
+  <rect x="170" y="20" width="360" height="50" rx="8" ry="8" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2" opacity="1"/>
+  <text x="350" y="50.5" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2f9e44" text-anchor="middle" opacity="1">Linux 应用程序 (ELF64 Binary)</text>
+  <polyline points="350,75 350,110" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#arrowhead)" opacity="1"/>
+  <text x="370" y="94.5" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#868e96" text-anchor="start" opacity="1">Linux 系统调用 (syscall)</text>
+  <rect x="170" y="115" width="360" height="55" rx="8" ry="8" fill="#a5d8ff" stroke="#1971c2" stroke-width="2" opacity="1"/>
+  <text x="350" y="149" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#1971c2" text-anchor="middle" opacity="1">Pico 进程 (User Mode)</text>
+  <polyline points="350,175 350,210" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#arrowhead)" opacity="1"/>
+  <text x="370" y="194.5" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#868e96" text-anchor="start" opacity="1">系统调用陷入</text>
+  <polyline points="20,215 680,215" fill="none" stroke="#e03131" stroke-width="3" stroke-dasharray="8 4" opacity="1"/>
+  <text x="690" y="209.75" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#e03131" text-anchor="end" opacity="1">用户模式 ▲  内核模式 ▼</text>
+  <rect x="170" y="225" width="360" height="65" rx="8" ry="8" fill="#ffec99" stroke="#f08c00" stroke-width="2" opacity="1"/>
+  <text x="350" y="249" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#f08c00" text-anchor="middle" opacity="1">Windows NT 内核</text>
+  <text x="350" y="272.25" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#868e96" text-anchor="middle" opacity="1">系统服务分发器</text>
+  <polyline points="350,295 350,330" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#arrowhead)" opacity="1"/>
+  <text x="370" y="314.5" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#868e96" text-anchor="start" opacity="1">转发给 Pico 提供程序</text>
+  <rect x="170" y="335" width="360" height="65" rx="8" ry="8" fill="#d0bfff" stroke="#9c36b5" stroke-width="2" opacity="1"/>
+  <text x="350" y="359" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#9c36b5" text-anchor="middle" opacity="1">lxcore.sys</text>
+  <text x="350" y="381.875" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#868e96" text-anchor="middle" opacity="1">Pico 提供程序 · Linux 系统调用翻译</text>
+  <polyline points="350,405 350,435" fill="none" stroke="#1e1e1e" stroke-width="2" opacity="1"/>
+  <polyline points="350,435 190,490" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#arrowhead)" opacity="1"/>
+  <polyline points="350,435 510,490" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#arrowhead)" opacity="1"/>
+  <rect x="70" y="495" width="220" height="70" rx="8" ry="8" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2" opacity="1"/>
+  <text x="180" y="527.25" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#2f9e44" text-anchor="middle" opacity="1">有等价 NT API</text>
+  <text x="180" y="543.5" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#2f9e44" text-anchor="middle" opacity="1">→ 调用 NT 内核功能</text>
+  <rect x="410" y="495" width="220" height="70" rx="8" ry="8" fill="#ffc9c9" stroke="#e03131" stroke-width="2" opacity="1"/>
+  <text x="520" y="527.25" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#e03131" text-anchor="middle" opacity="1">无等价 NT API</text>
+  <text x="520" y="543.5" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#e03131" text-anchor="middle" opacity="1">→ 驱动内部直接实现</text>
+</svg>

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 480" width="740" height="480">
+<defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1e1e1e"/>
+    </marker>
+    <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1971c2"/>
+    </marker>
+    <marker id="arrowhead-purple" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#9c36b5"/>
+    </marker>
+    <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#e03131"/>
+    </marker>
+    <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2f9e44"/>
+    </marker>
+  </defs>
+  <rect x="20" y="20" width="700" height="440" rx="8" ry="8" fill="none" stroke="#1e1e1e" stroke-width="2" opacity="1"/>
+  <rect x="30" y="30" width="680" height="130" rx="8" ry="8" fill="#a5d8ff" stroke="#1971c2" stroke-width="1" stroke-dasharray="8 4" opacity="0.25"/>
+  <text x="140" y="53" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#1971c2" text-anchor="middle" opacity="1">Windows 桌面</text>
+  <rect x="170" y="68" width="400" height="75" rx="8" ry="8" fill="#a5d8ff" stroke="#1971c2" stroke-width="2" opacity="1"/>
+  <text x="370" y="101" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#1971c2" text-anchor="middle" opacity="1">mstsc RDP 客户端</text>
+  <text x="370" y="121" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#1971c2" text-anchor="middle" opacity="1">(RAIL/VAIL Shell)</text>
+  <polyline points="20,175 720,175" fill="none" stroke="#e03131" stroke-width="2" stroke-dasharray="8 4" opacity="1"/>
+  <text x="710" y="191.875" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#e03131" text-anchor="end" opacity="1">WSL 2 虚拟机 ▼</text>
+  <polyline points="370,148 370,198" fill="none" stroke="#9c36b5" stroke-width="2" marker-end="url(#arrowhead-purple)" opacity="1"/>
+  <text x="385" y="173.5" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#9c36b5" text-anchor="start" opacity="1">RDP 虚拟通道</text>
+  <rect x="30" y="195" width="680" height="255" rx="8" ry="8" fill="#b2f2bb" stroke="#2f9e44" stroke-width="1" stroke-dasharray="8 4" opacity="0.2"/>
+  <rect x="170" y="210" width="400" height="75" rx="8" ry="8" fill="#d0bfff" stroke="#9c36b5" stroke-width="2" opacity="1"/>
+  <text x="370" y="244" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#9c36b5" text-anchor="middle" opacity="1">Weston Compositor</text>
+  <text x="370" y="264" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#9c36b5" text-anchor="middle" opacity="1">(扩展 RDP 后端)</text>
+  <polyline points="370,290 370,330" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#arrowhead)" opacity="1"/>
+  <text x="385" y="311.5" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#868e96" text-anchor="start" opacity="1">Wayland / X11</text>
+  <rect x="120" y="340" width="500" height="95" rx="8" ry="8" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2" opacity="1"/>
+  <text x="370" y="372" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2f9e44" text-anchor="middle" opacity="1">Linux GUI 应用程序</text>
+  <text x="370" y="401.25" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#868e96" text-anchor="middle" opacity="1">(GIMP, VS Code, Firefox 等)</text>
+</svg>

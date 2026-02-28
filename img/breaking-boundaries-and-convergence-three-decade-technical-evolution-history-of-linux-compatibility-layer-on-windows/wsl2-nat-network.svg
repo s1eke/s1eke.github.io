@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 425" width="280" height="425">
+<defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1e1e1e"/>
+    </marker>
+    <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1971c2"/>
+    </marker>
+    <marker id="arrowhead-purple" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#9c36b5"/>
+    </marker>
+    <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#e03131"/>
+    </marker>
+    <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2f9e44"/>
+    </marker>
+  </defs>
+  <rect x="20" y="20" width="240" height="45" rx="8" ry="8" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2" opacity="1"/>
+  <text x="140" y="49.25" font-family="Helvetica, Arial, sans-serif" font-size="18" fill="#1e1e1e" text-anchor="middle" opacity="1">外部网络</text>
+  <polyline points="140,70 140,100" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#arrowhead)" opacity="1"/>
+  <rect x="20" y="105" width="240" height="45" rx="8" ry="8" fill="#a5d8ff" stroke="#1971c2" stroke-width="2" opacity="1"/>
+  <text x="140" y="133.5" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#1971c2" text-anchor="middle" opacity="1">Windows 网络栈</text>
+  <polyline points="140,155 140,185" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#arrowhead)" opacity="1"/>
+  <rect x="20" y="190" width="240" height="45" rx="8" ry="8" fill="#ffec99" stroke="#f08c00" stroke-width="2" opacity="1"/>
+  <text x="140" y="217.75" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#f08c00" text-anchor="middle" opacity="1">NAT (网络地址转换)</text>
+  <polyline points="140,240 140,270" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#arrowhead)" opacity="1"/>
+  <rect x="20" y="275" width="240" height="45" rx="8" ry="8" fill="#d0bfff" stroke="#9c36b5" stroke-width="2" opacity="1"/>
+  <text x="140" y="302.75" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#9c36b5" text-anchor="middle" opacity="1">WSL 虚拟网络接口</text>
+  <polyline points="140,325 140,355" fill="none" stroke="#1e1e1e" stroke-width="2" marker-end="url(#arrowhead)" opacity="1"/>
+  <rect x="20" y="360" width="240" height="45" rx="8" ry="8" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2" opacity="1"/>
+  <text x="140" y="388.5" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#2f9e44" text-anchor="middle" opacity="1">Linux 网络栈</text>
+</svg>
