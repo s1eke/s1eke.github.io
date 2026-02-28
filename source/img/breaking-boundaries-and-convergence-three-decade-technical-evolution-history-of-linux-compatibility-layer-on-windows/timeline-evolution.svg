@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 970 301" width="970" height="301">
+<defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1e1e1e"/>
+    </marker>
+    <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1971c2"/>
+    </marker>
+    <marker id="arrowhead-purple" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#9c36b5"/>
+    </marker>
+    <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#e03131"/>
+    </marker>
+    <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2f9e44"/>
+    </marker>
+  </defs>
+  <text x="485" y="43.25" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#1e1e1e" text-anchor="middle" opacity="1">Windows 平台 Unix/Linux 兼容性技术演进</text>
+  <polyline points="85,190 885,190" fill="none" stroke="#868e96" stroke-width="3" opacity="1"/>
+  <ellipse cx="85" cy="190" rx="12" ry="12" fill="#ffc9c9" stroke="#e03131" stroke-width="2" opacity="1"/>
+  <text x="85" y="234.25" font-family="Helvetica, Arial, sans-serif" font-size="18" fill="#e03131" text-anchor="middle" opacity="1">1993</text>
+  <rect x="20" y="115" width="130" height="40" rx="8" ry="8" fill="#ffc9c9" stroke="#e03131" stroke-width="2" opacity="1"/>
+  <text x="85" y="140.25" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#e03131" text-anchor="middle" opacity="1">POSIX 子系统</text>
+  <text x="85" y="260" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#868e96" text-anchor="middle" opacity="1">最低限度合规</text>
+  <text x="85" y="275" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#868e96" text-anchor="middle" opacity="1">Windows NT 3.1</text>
+  <polyline points="85,160 85,178" fill="none" stroke="#e03131" stroke-width="1" opacity="1"/>
+  <ellipse cx="245" cy="190" rx="12" ry="12" fill="#ffec99" stroke="#f08c00" stroke-width="2" opacity="1"/>
+  <text x="245" y="234.25" font-family="Helvetica, Arial, sans-serif" font-size="18" fill="#f08c00" text-anchor="middle" opacity="1">1999</text>
+  <rect x="180" y="115" width="130" height="40" rx="8" ry="8" fill="#ffec99" stroke="#f08c00" stroke-width="2" opacity="1"/>
+  <text x="245" y="140.25" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#f08c00" text-anchor="middle" opacity="1">SFU / Interix</text>
+  <text x="245" y="260" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#868e96" text-anchor="middle" opacity="1">原生 Unix 子系统</text>
+  <text x="245" y="275" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#868e96" text-anchor="middle" opacity="1">收购 Softway Systems</text>
+  <polyline points="245,160 245,178" fill="none" stroke="#f08c00" stroke-width="1" opacity="1"/>
+  <ellipse cx="405" cy="190" rx="12" ry="12" fill="#a5d8ff" stroke="#1971c2" stroke-width="2" opacity="1"/>
+  <text x="405" y="234.25" font-family="Helvetica, Arial, sans-serif" font-size="18" fill="#1971c2" text-anchor="middle" opacity="1">2016</text>
+  <rect x="340" y="115" width="130" height="40" rx="8" ry="8" fill="#a5d8ff" stroke="#1971c2" stroke-width="2" opacity="1"/>
+  <text x="405" y="140.25" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#1971c2" text-anchor="middle" opacity="1">WSL 1</text>
+  <text x="405" y="260" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#868e96" text-anchor="middle" opacity="1">系统调用翻译层</text>
+  <text x="405" y="275" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#868e96" text-anchor="middle" opacity="1">Pico 进程架构</text>
+  <polyline points="405,160 405,178" fill="none" stroke="#1971c2" stroke-width="1" opacity="1"/>
+  <ellipse cx="565" cy="190" rx="12" ry="12" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2" opacity="1"/>
+  <text x="565" y="234.25" font-family="Helvetica, Arial, sans-serif" font-size="18" fill="#2f9e44" text-anchor="middle" opacity="1">2019</text>
+  <rect x="500" y="115" width="130" height="40" rx="8" ry="8" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2" opacity="1"/>
+  <text x="565" y="140.25" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#2f9e44" text-anchor="middle" opacity="1">WSL 2</text>
+  <text x="565" y="260" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#868e96" text-anchor="middle" opacity="1">轻量级虚拟机</text>
+  <text x="565" y="275" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#868e96" text-anchor="middle" opacity="1">真正的 Linux 内核</text>
+  <polyline points="565,160 565,178" fill="none" stroke="#2f9e44" stroke-width="1" opacity="1"/>
+  <ellipse cx="725" cy="190" rx="12" ry="12" fill="#d0bfff" stroke="#9c36b5" stroke-width="2" opacity="1"/>
+  <text x="725" y="234.25" font-family="Helvetica, Arial, sans-serif" font-size="18" fill="#9c36b5" text-anchor="middle" opacity="1">2021</text>
+  <rect x="660" y="115" width="130" height="40" rx="8" ry="8" fill="#d0bfff" stroke="#9c36b5" stroke-width="2" opacity="1"/>
+  <text x="725" y="140.25" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#9c36b5" text-anchor="middle" opacity="1">WSLg</text>
+  <text x="725" y="258.5" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#868e96" text-anchor="middle" opacity="1">Linux GUI 应用支持</text>
+  <polyline points="725,160 725,178" fill="none" stroke="#9c36b5" stroke-width="1" opacity="1"/>
+  <ellipse cx="885" cy="190" rx="12" ry="12" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2" opacity="1"/>
+  <text x="885" y="234.25" font-family="Helvetica, Arial, sans-serif" font-size="18" fill="#1e1e1e" text-anchor="middle" opacity="1">2025</text>
+  <rect x="820" y="115" width="130" height="40" rx="8" ry="8" fill="#e9ecef" stroke="#1e1e1e" stroke-width="2" opacity="1"/>
+  <text x="885" y="140.25" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#1e1e1e" text-anchor="middle" opacity="1">WSL 开源</text>
+  <text x="885" y="258.5" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#868e96" text-anchor="middle" opacity="1">代码库开放</text>
+  <polyline points="885,160 885,178" fill="none" stroke="#1e1e1e" stroke-width="1" opacity="1"/>
+</svg>
