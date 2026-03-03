@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>Tailscale 自建 DERP 节点全教程：解决国内中继高延迟问题 | S1eke&#39;s Blog | I&#39;m curious.</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="AI辅助,Tailscale,DERP,WireGuard">
+    <meta name="description" content="为什么需要 Tailscale？AI推动了硬件销售和软件迭代，很多人家里都部署了一下自己玩的或者用的服务，然后可能有些人为了方便随时能用就直接把服务暴露在公网上，这就导致人为增加了一堆入侵点。从安全角度来说，漏洞修复永远赶不上被利用的速度。一个 0day 出来，几小时之内全网扫描工具就开始扫了。 最近的飞牛 NAS OS 被 0day 打穿，详情看飞牛社区公告，一堆暴露在公网的设备变成了肉鸡；还有">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tailscale 自建 DERP 节点全教程：解决国内中继高延迟问题">
+<meta property="og:url" content="https://blog.jugg.xyz/2026/03/03/ops/tailscale-self-hosted-derp-node-complete-guide-solve-high-latency-in-domestic-network/index.html">
+<meta property="og:site_name" content="S1eke&#39;s Blog">
+<meta property="og:description" content="为什么需要 Tailscale？AI推动了硬件销售和软件迭代，很多人家里都部署了一下自己玩的或者用的服务，然后可能有些人为了方便随时能用就直接把服务暴露在公网上，这就导致人为增加了一堆入侵点。从安全角度来说，漏洞修复永远赶不上被利用的速度。一个 0day 出来，几小时之内全网扫描工具就开始扫了。 最近的飞牛 NAS OS 被 0day 打穿，详情看飞牛社区公告，一堆暴露在公网的设备变成了肉鸡；还有">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-03-03T11:58:42.000Z">
+<meta property="article:modified_time" content="2026-03-03T12:04:54.409Z">
+<meta property="article:author" content="Sean Fang">
+<meta property="article:tag" content="AI辅助">
+<meta property="article:tag" content="DERP">
+<meta property="article:tag" content="Tailscale">
+<meta property="article:tag" content="WireGuard">
+<meta name="twitter:card" content="summary">
+    
+        <link rel="alternate" type="application/atom+xml" title="S1eke&#39;s Blog" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/img/favicon.png">
+    <link rel="stylesheet" href="/css/style.css?v=1.8.0">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.webp">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Sean Fang</h5>
+          <a href="mailto:silence.boy@live.cn" title="silence.boy@live.cn" class="mail">silence.boy@live.cn</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                归档
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                分类
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/Timeline"  >
+                <i class="icon icon-lg icon-pagelines"></i>
+                时间线
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/s1eke" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Tailscale 自建 DERP 节点全教程：解决国内中继高延迟问题</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">Tailscale 自建 DERP 节点全教程：解决国内中继高延迟问题</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2026-03-03T11:58:42.000Z" itemprop="datePublished" class="page-time">
+  2026-03-03
+</time>
+
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-Tailscale%EF%BC%9F"><span class="post-toc-text">为什么需要 Tailscale？</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E9%80%89%E5%9E%8B%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF-Tailscale%EF%BC%9F"><span class="post-toc-text">选型：为什么是 Tailscale？</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E8%87%AA%E5%BB%BA-DERP-%E8%8A%82%E7%82%B9%EF%BC%9F"><span class="post-toc-text">为什么要自建 DERP 节点？</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E9%83%A8%E7%BD%B2%E7%8E%AF%E5%A2%83"><span class="post-toc-text">部署环境</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E5%AE%89%E8%A3%85-Go-%E8%AF%AD%E8%A8%80%E7%8E%AF%E5%A2%83"><span class="post-toc-text">第一步：安装 Go 语言环境</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E5%AE%89%E8%A3%85-DERP-%E6%9C%8D%E5%8A%A1%E7%AB%AF"><span class="post-toc-text">第二步：安装 DERP 服务端</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E5%AE%89%E8%A3%85-Tailscale-%E5%AE%A2%E6%88%B7%E7%AB%AF%EF%BC%88%E5%AE%89%E5%85%A8%E5%8A%A0%E5%9B%BA%EF%BC%89"><span class="post-toc-text">第三步：安装 Tailscale 客户端（安全加固）</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%EF%BC%9A%E9%85%8D%E7%BD%AE-TLS-%E8%AF%81%E4%B9%A6"><span class="post-toc-text">第四步：配置 TLS 证书</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E5%AE%89%E8%A3%85-Certbot"><span class="post-toc-text">安装 Certbot</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E7%94%B3%E8%AF%B7%E8%AF%81%E4%B9%A6"><span class="post-toc-text">申请证书</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E5%88%9B%E5%BB%BA%E8%AF%81%E4%B9%A6%E8%BD%AF%E9%93%BE%E6%8E%A5"><span class="post-toc-text">创建证书软链接</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E7%AC%AC%E4%BA%94%E6%AD%A5%EF%BC%9A%E5%90%AF%E5%8A%A8-DERP-%E6%9C%8D%E5%8A%A1"><span class="post-toc-text">第五步：启动 DERP 服务</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E9%AA%8C%E8%AF%81"><span class="post-toc-text">验证</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E7%AC%AC%E5%85%AD%E6%AD%A5%EF%BC%9A%E8%87%AA%E5%8A%A8%E5%8C%96%E8%BF%90%E7%BB%B4"><span class="post-toc-text">第六步：自动化运维</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E5%88%9B%E5%BB%BA-Systemd-Service"><span class="post-toc-text">创建 Systemd Service</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E5%88%9B%E5%BB%BA%E8%87%AA%E5%8A%A8%E6%9B%B4%E6%96%B0%E8%84%9A%E6%9C%AC"><span class="post-toc-text">创建自动更新脚本</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E9%85%8D%E7%BD%AE%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1"><span class="post-toc-text">配置定时任务</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E9%98%B2%E7%81%AB%E5%A2%99%E9%85%8D%E7%BD%AE"><span class="post-toc-text">防火墙配置</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E5%9C%A8-Tailscale-%E4%B8%AD%E9%85%8D%E7%BD%AE%E8%87%AA%E5%AE%9A%E4%B9%89-DERP-%E8%8A%82%E7%82%B9"><span class="post-toc-text">在 Tailscale 中配置自定义 DERP 节点</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E6%9C%AA%E6%9D%A5%E5%B1%95%E6%9C%9B"><span class="post-toc-text">未来展望</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-ops/tailscale-self-hosted-derp-node-complete-guide-solve-high-latency-in-domestic-network"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Tailscale 自建 DERP 节点全教程：解决国内中继高延迟问题</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2026-03-03 19:58:42" datetime="2026-03-03T11:58:42.000Z"  itemprop="datePublished">2026-03-03</time>
+
+            
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="为什么需要-Tailscale？"><a href="#为什么需要-Tailscale？" class="headerlink" title="为什么需要 Tailscale？"></a>为什么需要 Tailscale？</h2><p>AI推动了硬件销售和软件迭代，很多人家里都部署了一下自己玩的或者用的服务，然后可能有些人为了方便随时能用就直接把服务暴露在公网上，这就导致人为增加了一堆入侵点。从安全角度来说，漏洞修复永远赶不上被利用的速度。一个 0day 出来，几小时之内全网扫描工具就开始扫了。</p>
+<p>最近的飞牛 NAS OS 被 0day 打穿，详情看<a target="_blank" rel="noopener" href="https://club.fnnas.com/forum.php?mod=viewthread&tid=53420&extra=page=1">飞牛社区公告</a>，一堆暴露在公网的设备变成了肉鸡；还有<a target="_blank" rel="noopener" href="https://www.163.com/dy/article/KN3U5CL10511D3QS.html">超22万OpenClaw部署实例暴露公网</a>,基本是裸奔部署，甚至未启用身份验证。</p>
+<p>所以结论很简单：<strong>别把东西直接丢公网上</strong>。你需要一个安全的内网隧道，让设备之间像在同一个局域网一样互通，对外面的人来说你的服务压根不存在，这样能很大程度给你增加容错空间，让你发现安全问题时能有更多时间去修复。</p>
+<h2 id="选型：为什么是-Tailscale？"><a href="#选型：为什么是-Tailscale？" class="headerlink" title="选型：为什么是 Tailscale？"></a>选型：为什么是 Tailscale？</h2><p>市面上组网方案不少，简单列一下：</p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>Tailscale</th>
+<th>WireGuard</th>
+<th>OpenVPN</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>配置复杂度</td>
+<td>⭐ 极低</td>
+<td>⭐⭐ 中等</td>
+<td>⭐⭐⭐ 较高</td>
+</tr>
+<tr>
+<td>NAT 穿透</td>
+<td>✅ 自动打洞</td>
+<td>❌ 需手动配置</td>
+<td>❌ 需中心服务器</td>
+</tr>
+<tr>
+<td>网络拓扑</td>
+<td>Mesh（去中心化）</td>
+<td>点对点 &#x2F; 星型</td>
+<td>星型（中心化）</td>
+</tr>
+<tr>
+<td>性能</td>
+<td>高（基于 WireGuard）</td>
+<td>高</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>多平台支持</td>
+<td>全平台</td>
+<td>全平台</td>
+<td>全平台</td>
+</tr>
+<tr>
+<td>MagicDNS</td>
+<td>✅ 内置</td>
+<td>❌ 需自建</td>
+<td>❌ 需自建</td>
+</tr>
+<tr>
+<td>上手难度</td>
+<td>注册即用</td>
+<td>需要理解密钥交换</td>
+<td>需要管理证书</td>
+</tr>
+</tbody></table>
+<p>WireGuard 性能没话说，但你得自己搞密钥交换、自己配路由、自己处理 NAT 穿透，折腾完一圈头都大了。OpenVPN 就更不用提了，证书管理那一套，光配就能劝退一半人。</p>
+<p>Tailscale 底层就是 WireGuard，性能和加密都继承了，但上面做了一整套自动化——密钥交换、NAT 穿透、路由管理全给你包了。装上就能用，真的省心。</p>
+<h2 id="为什么要自建-DERP-节点？"><a href="#为什么要自建-DERP-节点？" class="headerlink" title="为什么要自建 DERP 节点？"></a>为什么要自建 DERP 节点？</h2><p>Tailscale 大部分时候能直接打洞成功，两台设备点对点直连，体验很好。但总有打洞失败的时候，这时候流量就得走 <strong>DERP（Designated Encrypted Relay for Packets）</strong> 中继服务器绕一下。</p>
+<p>问题来了：<strong>官方的 DERP 节点基本全在境外</strong>。</p>
+<p>国内的网络环境大家都懂，中继流量绕一圈海外再回来，延迟上百毫秒是常态，还不稳定，丢包也多。这体验能好才怪。</p>
+<p>所以如果你在国内有台服务器，自建一个 DERP 节点是很有必要的。打洞失败的时候走国内中继，延迟直接从上百毫秒降到个位数，体验天差地别。</p>
+<hr>
+<h2 id="部署环境"><a href="#部署环境" class="headerlink" title="部署环境"></a>部署环境</h2><p>先交代一下本文的环境：</p>
+<ul>
+<li><strong>操作系统</strong>：Debian 13 (Trixie)</li>
+<li><strong>Go 版本</strong>：1.26.0</li>
+<li><strong>示例域名</strong>：<code>derper.example.com</code>（请替换为你自己的域名）</li>
+</ul>
+<blockquote>
+<p>⚠️ <strong>注意</strong>：本文中所有涉及域名的地方均使用 <code>derper.example.com</code> 作为示例，请在实际部署时替换为你自己的域名。</p>
+</blockquote>
+<hr>
+<h2 id="第一步：安装-Go-语言环境"><a href="#第一步：安装-Go-语言环境" class="headerlink" title="第一步：安装 Go 语言环境"></a>第一步：安装 Go 语言环境</h2><p>derper 是 Go 写的，安装需要 Go 环境。一般来说 derper 都依赖最新版本的 Go，而各大发行版包管理器里的版本基本都是老的，所以老老实实用官方的二进制包装吧。</p>
+<p>参考 <a target="_blank" rel="noopener" href="https://go.dev/doc/install">Go 官方安装文档</a>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 下载 Go 最新版本（以 1.26.0 为例，请根据实际情况调整版本号）</span></span><br><span class="line">wget https://go.dev/dl/go1.26.0.linux-amd64.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除旧版本并解压新版本</span></span><br><span class="line">sudo <span class="built_in">rm</span> -rf /usr/local/go</span><br><span class="line">sudo tar -C /usr/local -xzf go1.26.0.linux-amd64.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置环境变量（添加到 ~/.bashrc 或 ~/.zshrc）</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin&#x27;</span> &gt;&gt; ~/.bashrc</span><br><span class="line"><span class="built_in">source</span> ~/.bashrc</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证安装</span></span><br><span class="line">go version</span><br><span class="line"><span class="comment"># 输出：go version go1.26.0 linux/amd64</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="第二步：安装-DERP-服务端"><a href="#第二步：安装-DERP-服务端" class="headerlink" title="第二步：安装 DERP 服务端"></a>第二步：安装 DERP 服务端</h2><p>Go 装好了，装 derper 就一条命令的事：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go install tailscale.com/cmd/derper@latest</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>💡 <strong>国内加速</strong>：国内服务器拉 Go 模块可能连不上，配个 <a target="_blank" rel="noopener" href="https://goproxy.cn/">GOPROXY.CN</a> 代理就好了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> GOPROXY=https://goproxy.cn,direct</span><br><span class="line">go install tailscale.com/cmd/derper@latest</span><br></pre></td></tr></table></figure></blockquote>
+<p>装完之后 derper 二进制文件在 <code>$HOME/go/bin/derper</code>。</p>
+<h2 id="第三步：安装-Tailscale-客户端（安全加固）"><a href="#第三步：安装-Tailscale-客户端（安全加固）" class="headerlink" title="第三步：安装 Tailscale 客户端（安全加固）"></a>第三步：安装 Tailscale 客户端（安全加固）</h2><p>这步很关键。</p>
+<p>默认情况下，<strong>只要有人知道你 DERP 服务器的 IP，就可以把它加到自己的 DERP map 里，然后白嫖你的带宽做中继</strong>。你辛辛苦苦搭的节点，结果给别人当免费中转站，想想就亏。</p>
+<p>解决办法是在 DERP 服务器上同时跑一个 <code>tailscaled</code>，然后启动 derper 的时候加 <code>--verify-clients</code> 参数。这样 derper 会检查过来连接的客户端是不是你自己 tailnet 里的设备，不是的话直接拒绝。</p>
+<p>装 Tailscale：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -fsSL https://tailscale.com/install.sh | sh</span><br></pre></td></tr></table></figure>
+
+<p>然后加入你的 tailnet：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo tailscale up</span><br></pre></td></tr></table></figure>
+
+<p>会给你一个 URL，浏览器打开登录授权就行。去 <a target="_blank" rel="noopener" href="https://login.tailscale.com/admin/machines">Tailscale 管理面板</a> 看到这台机器了，就说明成了。</p>
+<h2 id="第四步：配置-TLS-证书"><a href="#第四步：配置-TLS-证书" class="headerlink" title="第四步：配置 TLS 证书"></a>第四步：配置 TLS 证书</h2><p>DERP 是走 HTTPS 的，所以需要 TLS 证书。我们用 Let’s Encrypt 的免费证书，工具用 certbot。</p>
+<h3 id="安装-Certbot"><a href="#安装-Certbot" class="headerlink" title="安装 Certbot"></a>安装 Certbot</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo apt install -y certbot</span><br></pre></td></tr></table></figure>
+
+<h3 id="申请证书"><a href="#申请证书" class="headerlink" title="申请证书"></a>申请证书</h3><p>先确保 <code>derper.example.com</code> 的 DNS 已经解析到这台服务器，然后：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用 standalone 模式申请证书（需要临时占用 80 端口）</span></span><br><span class="line">sudo certbot certonly --standalone -d derper.example.com</span><br></pre></td></tr></table></figure>
+
+<p>跟着提示填邮箱、同意条款就行。搞定后证书在这：</p>
+<ul>
+<li>证书：<code>/etc/letsencrypt/live/derper.example.com/fullchain.pem</code></li>
+<li>私钥：<code>/etc/letsencrypt/live/derper.example.com/privkey.pem</code></li>
+</ul>
+<h3 id="创建证书软链接"><a href="#创建证书软链接" class="headerlink" title="创建证书软链接"></a>创建证书软链接</h3><p>这里有个坑：<strong>derper 只能指定证书目录，没法直接指定证书文件</strong>。它会在目录里按 <code>&lt;hostname&gt;.crt</code> 和 <code>&lt;hostname&gt;.key</code> 的规则去找。但 Let’s Encrypt 生成出来的叫 <code>fullchain.pem</code> 和 <code>privkey.pem</code>，名字对不上。</p>
+<p>建个软链接就好了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建证书目录</span></span><br><span class="line">sudo <span class="built_in">mkdir</span> -p /var/lib/derper/certs/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建软链接</span></span><br><span class="line">sudo <span class="built_in">ln</span> -s /etc/letsencrypt/live/derper.example.com/fullchain.pem \</span><br><span class="line">    /var/lib/derper/certs/derper.example.com.crt</span><br><span class="line">sudo <span class="built_in">ln</span> -s /etc/letsencrypt/live/derper.example.com/privkey.pem \</span><br><span class="line">    /var/lib/derper/certs/derper.example.com.key</span><br></pre></td></tr></table></figure>
+
+<h2 id="第五步：启动-DERP-服务"><a href="#第五步：启动-DERP-服务" class="headerlink" title="第五步：启动 DERP 服务"></a>第五步：启动 DERP 服务</h2><p>准备工作搞定了，来启动 derper。先看下每个参数啥意思：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>-hostname</code></td>
+<td>DERP 服务器的域名</td>
+</tr>
+<tr>
+<td><code>-certdir</code></td>
+<td>TLS 证书所在目录</td>
+</tr>
+<tr>
+<td><code>-certmode=manual</code></td>
+<td>手动管理证书（我们用 certbot，不让 derper 自己申请）</td>
+</tr>
+<tr>
+<td><code>-http-port=-1</code></td>
+<td>关掉 HTTP 端口（只用 HTTPS）</td>
+</tr>
+<tr>
+<td><code>-a=:4501</code></td>
+<td>HTTPS 监听端口</td>
+</tr>
+<tr>
+<td><code>-stun-port=4502</code></td>
+<td>STUN 端口（辅助 NAT 穿透）</td>
+</tr>
+<tr>
+<td><code>-verify-clients</code></td>
+<td>只允许你自己 tailnet 的设备用</td>
+</tr>
+</tbody></table>
+<p>启动：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">/root/go/bin/derper \</span><br><span class="line">    -hostname=derper.example.com \</span><br><span class="line">    -certdir=/var/lib/derper/certs/ \</span><br><span class="line">    -certmode=manual \</span><br><span class="line">    -http-port=-1 \</span><br><span class="line">    -a=:4501 \</span><br><span class="line">    -stun-port=4502 \</span><br><span class="line">    -verify-clients</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><p>浏览器打开 <code>https://derper.example.com:4501</code>，看到下面这行字就成了：</p>
+<blockquote>
+<p><strong>This is a Tailscale DERP server.</strong></p>
+</blockquote>
+<hr>
+<h2 id="第六步：自动化运维"><a href="#第六步：自动化运维" class="headerlink" title="第六步：自动化运维"></a>第六步：自动化运维</h2><p>总不能一直手动跑 derper 吧，搞成系统服务，再加上自动更新。</p>
+<h3 id="创建-Systemd-Service"><a href="#创建-Systemd-Service" class="headerlink" title="创建 Systemd Service"></a>创建 Systemd Service</h3><p>我们使用 systemd 的模板实例功能。</p>
+<p>创建 <code>/etc/systemd/system/tailscale-derp@.service</code>：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[Unit]</span></span><br><span class="line"><span class="attr">Description</span>=Tailscale DERP Server</span><br><span class="line"><span class="attr">After</span>=network.target tailscaled.service</span><br><span class="line"><span class="attr">Requires</span>=tailscaled.service</span><br><span class="line"></span><br><span class="line"><span class="section">[Service]</span></span><br><span class="line"><span class="attr">Type</span>=simple</span><br><span class="line"><span class="attr">ExecStart</span>=/root/go/bin/derper \</span><br><span class="line">    <span class="attr">-hostname</span>=%i \</span><br><span class="line">    <span class="attr">-certdir</span>=/var/lib/derper/certs/ \</span><br><span class="line">    <span class="attr">-certmode</span>=manual \</span><br><span class="line">    <span class="attr">-http-port</span>=-<span class="number">1</span> \</span><br><span class="line">    <span class="attr">-a</span>=:<span class="number">4501</span> \</span><br><span class="line">    <span class="attr">-stun-port</span>=<span class="number">4502</span> \</span><br><span class="line">    -verify-clients</span><br><span class="line"><span class="attr">Restart</span>=always</span><br><span class="line"><span class="attr">RestartSec</span>=<span class="number">5</span></span><br><span class="line"><span class="attr">StandardOutput</span>=journal</span><br><span class="line"><span class="attr">StandardError</span>=journal</span><br><span class="line"></span><br><span class="line"><span class="section">[Install]</span></span><br><span class="line"><span class="attr">WantedBy</span>=multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p>启用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动服务（将 derper.example.com 替换为你的域名）</span></span><br><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl <span class="built_in">enable</span> --now tailscale-derp@derper.example.com</span><br><span class="line">    </span><br><span class="line"><span class="comment"># 检查运行状态</span></span><br><span class="line">sudo systemctl status tailscale-derp@derper.example.com</span><br></pre></td></tr></table></figure>
+
+<h3 id="创建自动更新脚本"><a href="#创建自动更新脚本" class="headerlink" title="创建自动更新脚本"></a>创建自动更新脚本</h3><p>derper 和 tailscale 都在持续更新，为了不落后版本太多，写个自动更新脚本。</p>
+<p>创建 <code>/usr/local/bin/update-tailscale-derp.sh</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="built_in">set</span> -euo pipefail</span><br><span class="line"></span><br><span class="line">LOG_TAG=<span class="string">&quot;tailscale-derp-updater&quot;</span></span><br><span class="line">GOPROXY=<span class="string">&quot;https://goproxy.cn,direct&quot;</span></span><br><span class="line"><span class="built_in">export</span> GOPROXY</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">log</span></span>() &#123;</span><br><span class="line">    logger -t <span class="string">&quot;<span class="variable">$LOG_TAG</span>&quot;</span> <span class="string">&quot;<span class="variable">$@</span>&quot;</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;[<span class="subst">$(date &#x27;+%Y-%m-%d %H:%M:%S&#x27;)</span>] $*&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">update_derper</span></span>() &#123;</span><br><span class="line">    <span class="built_in">log</span> <span class="string">&quot;检查 derper 更新...&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">local</span> current_version</span><br><span class="line">    current_version=$(/root/go/bin/derper --version 2&gt;&amp;1 || <span class="built_in">echo</span> <span class="string">&quot;unknown&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">timeout</span> 60 go install tailscale.com/cmd/derper@latest 2&gt;&amp;1; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">local</span> new_version</span><br><span class="line">        new_version=$(/root/go/bin/derper --version 2&gt;&amp;1 || <span class="built_in">echo</span> <span class="string">&quot;unknown&quot;</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> [ <span class="string">&quot;<span class="variable">$current_version</span>&quot;</span> != <span class="string">&quot;<span class="variable">$new_version</span>&quot;</span> ]; <span class="keyword">then</span></span><br><span class="line">            <span class="built_in">log</span> <span class="string">&quot;derper 已从 <span class="variable">$current_version</span> 更新至 <span class="variable">$new_version</span>&quot;</span></span><br><span class="line">            <span class="built_in">return</span> 0</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="built_in">log</span> <span class="string">&quot;derper 已是最新版本: <span class="variable">$current_version</span>&quot;</span></span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="built_in">log</span> <span class="string">&quot;derper 更新失败&quot;</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">    <span class="built_in">return</span> 1</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">update_tailscale</span></span>() &#123;</span><br><span class="line">    <span class="built_in">log</span> <span class="string">&quot;检查 Tailscale 更新...&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">local</span> current_version</span><br><span class="line">    current_version=$(tailscale version 2&gt;&amp;1 | <span class="built_in">head</span> -1)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">timeout</span> 60 bash -c <span class="string">&#x27;apt-get update &amp;&amp; apt-get install -y --only-upgrade tailscale&#x27;</span> 2&gt;&amp;1; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">local</span> new_version</span><br><span class="line">        new_version=$(tailscale version 2&gt;&amp;1 | <span class="built_in">head</span> -1)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> [ <span class="string">&quot;<span class="variable">$current_version</span>&quot;</span> != <span class="string">&quot;<span class="variable">$new_version</span>&quot;</span> ]; <span class="keyword">then</span></span><br><span class="line">            <span class="built_in">log</span> <span class="string">&quot;Tailscale 已从 <span class="variable">$current_version</span> 更新至 <span class="variable">$new_version</span>&quot;</span></span><br><span class="line">            <span class="built_in">return</span> 0</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="built_in">log</span> <span class="string">&quot;Tailscale 已是最新版本: <span class="variable">$current_version</span>&quot;</span></span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="built_in">log</span> <span class="string">&quot;Tailscale 更新失败&quot;</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">    <span class="built_in">return</span> 1</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">main</span></span>() &#123;</span><br><span class="line">    <span class="built_in">log</span> <span class="string">&quot;===== 开始自动更新 =====&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> update_derper; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">log</span> <span class="string">&quot;重启 derper 服务...&quot;</span></span><br><span class="line">        systemctl restart <span class="string">&#x27;tailscale-derp@*&#x27;</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> update_tailscale; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">log</span> <span class="string">&quot;重启 tailscaled 服务...&quot;</span></span><br><span class="line">        systemctl restart tailscaled</span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">log</span> <span class="string">&quot;===== 自动更新完成 =====&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">main <span class="string">&quot;<span class="variable">$@</span>&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>赋予执行权限：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo <span class="built_in">chmod</span> +x /usr/local/bin/update-tailscale-derp.sh</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置定时任务"><a href="#配置定时任务" class="headerlink" title="配置定时任务"></a>配置定时任务</h3><p>用 systemd timer 每天凌晨 4 点跑一次更新。</p>
+<p>创建 <code>/etc/systemd/system/update-tailscale-derp.service</code>：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[Unit]</span></span><br><span class="line"><span class="attr">Description</span>=Update Tailscale and DERP Server</span><br><span class="line"></span><br><span class="line"><span class="section">[Service]</span></span><br><span class="line"><span class="attr">Type</span>=<span class="literal">on</span>eshot</span><br><span class="line"><span class="attr">ExecStart</span>=/usr/local/bin/update-tailscale-derp.sh</span><br><span class="line"><span class="attr">Environment</span>=<span class="string">&quot;PATH=/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin&quot;</span></span><br><span class="line"><span class="attr">Environment</span>=<span class="string">&quot;HOME=/root&quot;</span></span><br></pre></td></tr></table></figure>
+
+
+<p>创建 <code>/etc/systemd/system/update-tailscale-derp.timer</code>：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[Unit]</span></span><br><span class="line"><span class="attr">Description</span>=Daily Update for Tailscale and DERP Server</span><br><span class="line"></span><br><span class="line"><span class="section">[Timer]</span></span><br><span class="line"><span class="attr">OnCalendar</span>=*-*-* <span class="number">04</span>:<span class="number">00</span>:<span class="number">00</span></span><br><span class="line"><span class="attr">Persistent</span>=<span class="literal">false</span></span><br><span class="line"><span class="attr">RandomizedDelaySec</span>=<span class="number">300</span></span><br><span class="line"></span><br><span class="line"><span class="section">[Install]</span></span><br><span class="line"><span class="attr">WantedBy</span>=timers.target</span><br></pre></td></tr></table></figure>
+
+<p>启用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl <span class="built_in">enable</span> --now update-tailscale-derp.timer</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证定时器状态</span></span><br><span class="line">sudo systemctl list-timers update-tailscale-derp.timer</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="防火墙配置"><a href="#防火墙配置" class="headerlink" title="防火墙配置"></a>防火墙配置</h2><p>别忘了放行端口：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 如果使用 ufw</span></span><br><span class="line">sudo ufw allow 4501/tcp   <span class="comment"># HTTPS (DERP)</span></span><br><span class="line">sudo ufw allow 4502/udp   <span class="comment"># STUN</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果使用 iptables</span></span><br><span class="line">sudo iptables -A INPUT -p tcp --dport 4501 -j ACCEPT</span><br><span class="line">sudo iptables -A INPUT -p udp --dport 4502 -j ACCEPT</span><br></pre></td></tr></table></figure>
+
+<h2 id="在-Tailscale-中配置自定义-DERP-节点"><a href="#在-Tailscale-中配置自定义-DERP-节点" class="headerlink" title="在 Tailscale 中配置自定义 DERP 节点"></a>在 Tailscale 中配置自定义 DERP 节点</h2><p>DERP 跑起来了还不够，得告诉 Tailscale 它的存在。</p>
+<p>去 <a target="_blank" rel="noopener" href="https://login.tailscale.com/admin/acls">Tailscale ACL 配置页面</a>，加上 <code>derpMap</code>：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;derpMap&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;OmitDefaultRegions&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;Regions&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;900&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;RegionID&quot;</span><span class="punctuation">:</span> <span class="number">900</span><span class="punctuation">,</span></span><br><span class="line">                <span class="attr">&quot;RegionCode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;myderp&quot;</span><span class="punctuation">,</span></span><br><span class="line">                <span class="attr">&quot;RegionName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;My DERP Server&quot;</span><span class="punctuation">,</span></span><br><span class="line">                <span class="attr">&quot;Nodes&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">                    <span class="punctuation">&#123;</span></span><br><span class="line">                        <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;myderp-1&quot;</span><span class="punctuation">,</span></span><br><span class="line">                        <span class="attr">&quot;RegionID&quot;</span><span class="punctuation">:</span> <span class="number">900</span><span class="punctuation">,</span></span><br><span class="line">                        <span class="attr">&quot;HostName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;derper.example.com&quot;</span><span class="punctuation">,</span></span><br><span class="line">                        <span class="attr">&quot;DERPPort&quot;</span><span class="punctuation">:</span> <span class="number">4501</span><span class="punctuation">,</span></span><br><span class="line">                        <span class="attr">&quot;STUNPort&quot;</span><span class="punctuation">:</span> <span class="number">4502</span></span><br><span class="line">                    <span class="punctuation">&#125;</span></span><br><span class="line">                <span class="punctuation">]</span></span><br><span class="line">            <span class="punctuation">&#125;</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>OmitDefaultRegions</code> 设成 <code>false</code>，保留官方节点当备选。<code>RegionID</code> 用 900 以上的数字，别跟官方的撞了。</p>
+<p>保存后在任意客户端上跑一下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tailscale netcheck</span><br></pre></td></tr></table></figure>
+
+<p>能看到你的自定义节点和延迟信息就说明配置生效了。</p>
+<hr>
+<h2 id="未来展望"><a href="#未来展望" class="headerlink" title="未来展望"></a>未来展望</h2><p>说实话现在这套部署流程还是偏复杂了——装 Go、编译、搞证书、写一堆 systemd 文件，步骤不少。理想情况应该是 Docker 一把梭，再丢到 Nginx 后面，对外只开 80 和 443。</p>
+<p>但目前 Tailscale 官方不太推荐反代 derper，因为 DERP 协议涉及 WebSocket 升级和长连接，反代容易出问题。所以这事暂时先放着，后面有新进展再更新。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2026-03-03T12:04:54.409Z" itemprop="dateUpdated">2026-03-03 20:04:54</time>
+</span><br>
+
+
+        
+    </div>
+    
+    <footer>
+        <a href="https://blog.jugg.xyz">
+            <img src="/img/avatar.webp" alt="Sean Fang">
+            Sean Fang
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/AI%E8%BE%85%E5%8A%A9/" rel="tag">AI辅助</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/DERP/" rel="tag">DERP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Tailscale/" rel="tag">Tailscale</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/WireGuard/" rel="tag">WireGuard</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.jugg.xyz/2026/03/03/ops/tailscale-self-hosted-derp-node-complete-guide-solve-high-latency-in-domestic-network/&title=《Tailscale 自建 DERP 节点全教程：解决国内中继高延迟问题》 — S1eke's Blog&pic=https://blog.jugg.xyz/img/avatar.webp" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.jugg.xyz/2026/03/03/ops/tailscale-self-hosted-derp-node-complete-guide-solve-high-latency-in-domestic-network/&title=《Tailscale 自建 DERP 节点全教程：解决国内中继高延迟问题》 — S1eke's Blog&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.jugg.xyz/2026/03/03/ops/tailscale-self-hosted-derp-node-complete-guide-solve-high-latency-in-domestic-network/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Tailscale 自建 DERP 节点全教程：解决国内中继高延迟问题》 — S1eke's Blog&url=https://blog.jugg.xyz/2026/03/03/ops/tailscale-self-hosted-derp-node-complete-guide-solve-high-latency-in-domestic-network/&via=https://blog.jugg.xyz" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.jugg.xyz/2026/03/03/ops/tailscale-self-hosted-derp-node-complete-guide-solve-high-latency-in-domestic-network/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2026/02/28/musings/breaking-boundaries-and-convergence-three-decade-technical-evolution-history-of-linux-compatibility-layer-on-windows/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">破界与融合：Windows 下 Linux 兼容层的三十年技术迭代史</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+    <section class="comments" id="comments">
+        <div id="giscus_thread"></div>
+        <script src="https://giscus.app/client.js"
+            data-repo="s1eke/s1eke.github.io"
+            data-repo-id="R_kgDOLe05uQ"
+            data-category="Announcements"
+            data-category-id="DIC_kwDOLe05uc4Cf1-1"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="light_protanopia"
+            data-lang="zh-CN"
+            data-loading="zh-CN"
+            crossorigin="anonymous"
+            async>
+        </script>
+    </section>
+    
+    
+    
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>Sean Fang &copy; 2015 - 2026</span>
+            <span>
+                
+                Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.jugg.xyz/2026/03/03/ops/tailscale-self-hosted-derp-node-complete-guide-solve-high-latency-in-domestic-network/&title=《Tailscale 自建 DERP 节点全教程：解决国内中继高延迟问题》 — S1eke's Blog&pic=https://blog.jugg.xyz/img/avatar.webp" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.jugg.xyz/2026/03/03/ops/tailscale-self-hosted-derp-node-complete-guide-solve-high-latency-in-domestic-network/&title=《Tailscale 自建 DERP 节点全教程：解决国内中继高延迟问题》 — S1eke's Blog&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.jugg.xyz/2026/03/03/ops/tailscale-self-hosted-derp-node-complete-guide-solve-high-latency-in-domestic-network/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Tailscale 自建 DERP 节点全教程：解决国内中继高延迟问题》 — S1eke's Blog&url=https://blog.jugg.xyz/2026/03/03/ops/tailscale-self-hosted-derp-node-complete-guide-solve-high-latency-in-domestic-network/&via=https://blog.jugg.xyz" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.jugg.xyz/2026/03/03/ops/tailscale-self-hosted-derp-node-complete-guide-solve-high-latency-in-domestic-network/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASYAAAEmCAAAAADqr2IGAAAEg0lEQVR42u3by24bSwwE0Pz/TzvAXQVILFeRbVz1+MzKkKx5HC26i6R+/YqPj/+OP//+85X8s69f+fv47N3k9c/uNr/z+sCECRMmTG/J9PHySE79ER+bW38N1N5t/uyYMGHChOkZTMnp2hUz30y8fiUnTsiS58KECRMmTD+TabMkJ0BJqC4ebBGDMWHChAnTz2TKH3u2DL/eZMz+ZxaSMWHChAnT85g2ZdnZfyax+WwROd/WYMKECROmJzHNBnee8fe3zzdhwoQJE6b/leljcbRxNw/MsxGcWVSOnhQTJkyYMF3LlJ/69a18364kCdj5l5Q/xbDejAkTJkyY3oxp08jMW4Ztebcd5Wlp6o0FJkyYMGG6lilp/uVL6WbYND9D/j95UK+7vpgwYcKE6Sqmthjajt3M4Nqw3Q6eHgvwmDBhwoTp7ZlmAXg2HNMuz6cKwe1m4lipFxMmTJgwvRnTLFgmYzenhnVOFaProjAmTJgwYbqQqR0tzaPsrOW5j9/fch5MmDBhwnQ5U3Lq/N28TXhq5HQTy6NrYcKECROma5k2UXPWOEwC876dOStYFxUCTJgwYcJ0FVMbbjePd6CtuObDhAkTJkw/mSkfvtmE1TYYn42+db8XEyZMmDBdyzQLje3ITh6e9++eDdWYMGHChOlJTHkgfP3Z2Rjo2dHYU2H+HyOqmDBhwoTpKqZ8+W8Lr+3r7WZi1p5sQzgmTJgwYXoG06mtQLvMb66bLPntRueLT2HChAkTpguZ2nbj7GE218p/yNGWhovnwoQJEyZMj2ZKbmXf7EwI8kGiWYT+9GvGhAkTJkzXMrWPvWlqbuL0rLic/Egjj+6YMGHChOlGpk1J9DsW47ZYXA/czBIuJkyYMGF6BFOOOLv1nK+9w+TLmG0IMGHChAnT7UyzgZgkTG6Y2sLrZnS1uE9MmDBhwnQt02zh3LRC80LwWfRZoxQTJkyYMD2DabZMbkZwZhF0c/7ZCCwmTJgwYXoGU/7h/KcReYTOx4bajUg7kPTFtTBhwoQJ01VMp8ZuNsv55piF7eQr/GJEFRMmTJgwXcjULpmb0m0+KtpuSk7VADBhwoQJ05OY8vLuZqSmLRZvgm4esItOLyZMmDBhehxTcuHZqM2m8Lppc85iMCZMmDBhegZT26QsomNMeWqg51RsLrI4JkyYMGF6S6ZNrM2X8/ZraJf8WUhuP4UJEyZMmG5kyhfF2WXyGmlbIJ4VcNsiclRLxoQJEyZMlzDNSq7FoOcosrbtyWTbEQVdTJgwYcL0CKZZ+fXU9iK/xbY9WSz25VUwYcKECdNdTB/lkS/YbUM02UDMBls3wfsfv1nBhAkTJkxXMW0Wy3bE59RQ6Wb4dXO3mDBhwoTpXqZ8E3B2QZ19k+1m5VgJGxMmTJgwXc50trTatjlnPcRZmTg5PyZMmDBhwtQuwEmh9lRsbhuo0euYMGHChOkHMO0bnKfKsrNtx+auMGHChAnT7UwziFmY3A+ttqBtUC+SNyZMmDBhenumTZG03Qrsl+rN6/vRVUyYMGHCdBXTbzfhI0SjXsCHAAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script>
+    var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+<script src="/js/main.js?v=1.8.0"></script>
+
+    
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+        <script src="/js/search.js?v=1.8.0" async></script>
+        
+
+            
+
+
+                
+                    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    
+
+                        
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = 'S1eke\'s Blog';
+            clearTimeout(titleTime);
+        } else {
+            document.title = 'S1eke\'s Blog';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+</body>
+</html>
