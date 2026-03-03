@@ -1,7 +1,12 @@
 ---
 title: 破界与融合：Windows 下 Linux 兼容层的三十年技术迭代史
 date: 2026-02-28 14:58:19
-tags: ["Linux", "Windows", "WSL", "musings"]
+tags: 
+    - Linux
+    - Windows
+    - WSL
+    - musings
+    - AI辅助
 ---
 
 > **摘要**：Windows Subsystem for Linux（WSL）是 Microsoft 在 Windows 操作系统上提供原生 Linux 兼容性的技术方案。本文系统性地回顾了从 Windows NT 时代的 POSIX 子系统，到 Windows Services for UNIX（SFU）/Interix，再到 WSL 1 系统调用翻译层和 WSL 2 轻量级虚拟机的完整技术演进历程。
