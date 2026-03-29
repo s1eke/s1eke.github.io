@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>AI 开发体验 | S1eke&#39;s Blog | I&#39;m curious.</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="开发">
+    <meta name="description" content="最近花了差不多两个星期，开发了一个小说阅读器：PlotMapAI，感慨万分，现在的 AI 是真的强大。我基本上没有修改过 AI 生成的任何代码，一直在提需求，只有一些比较简单的东西自己手动微调了一下。今天也发布了 v1.1.0 版本，算是告一段落了，可以来写一下一路上踩过的坑。 TokensTokens 不够是最大的坑，我本来用的是 Antigravity，弄了一个学生账号，免费试用一年的 Goo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI 开发体验">
+<meta property="og:url" content="https://blog.jugg.xyz/2026/03/29/musings/ai-development-experience/index.html">
+<meta property="og:site_name" content="S1eke&#39;s Blog">
+<meta property="og:description" content="最近花了差不多两个星期，开发了一个小说阅读器：PlotMapAI，感慨万分，现在的 AI 是真的强大。我基本上没有修改过 AI 生成的任何代码，一直在提需求，只有一些比较简单的东西自己手动微调了一下。今天也发布了 v1.1.0 版本，算是告一段落了，可以来写一下一路上踩过的坑。 TokensTokens 不够是最大的坑，我本来用的是 Antigravity，弄了一个学生账号，免费试用一年的 Goo">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-03-29T15:30:27.000Z">
+<meta property="article:modified_time" content="2026-03-29T18:32:52.012Z">
+<meta property="article:author" content="Sean Fang">
+<meta property="article:tag" content="开发">
+<meta name="twitter:card" content="summary">
+    
+        <link rel="alternate" type="application/atom+xml" title="S1eke&#39;s Blog" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/img/favicon.png">
+    <link rel="stylesheet" href="/css/style.css?v=1.8.0">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.webp">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Sean Fang</h5>
+          <a href="mailto:silence.boy@live.cn" title="silence.boy@live.cn" class="mail">silence.boy@live.cn</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                归档
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                分类
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/Timeline"  >
+                <i class="icon icon-lg icon-pagelines"></i>
+                时间线
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/s1eke" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">AI 开发体验</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">AI 开发体验</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2026-03-29T15:30:27.000Z" itemprop="datePublished" class="page-time">
+  2026-03-29
+</time>
+
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Tokens"><span class="post-toc-text">Tokens</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E9%87%8D%E6%9E%84"><span class="post-toc-text">重构</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E6%95%99%E8%AE%AD"><span class="post-toc-text">教训</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-musings/ai-development-experience"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">AI 开发体验</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2026-03-29 23:30:27" datetime="2026-03-29T15:30:27.000Z"  itemprop="datePublished">2026-03-29</time>
+
+            
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>最近花了差不多两个星期，开发了一个小说阅读器：<a target="_blank" rel="noopener" href="https://github.com/s1eke-labs/PlotMapAI">PlotMapAI</a>，感慨万分，现在的 AI 是真的强大。我基本上没有修改过 AI 生成的任何代码，一直在提需求，只有一些比较简单的东西自己手动微调了一下。今天也发布了 v1.1.0 版本，算是告一段落了，可以来写一下一路上踩过的坑。</p>
+<h2 id="Tokens"><a href="#Tokens" class="headerlink" title="Tokens"></a>Tokens</h2><p>Tokens 不够是最大的坑，我本来用的是 Antigravity，弄了一个学生账号，免费试用一年的 Google AI Pro。但是 Google 对额度的管控越来越严格，从一开始的五小时刷新额度，到后面一个礼拜刷新一次额度，而且额度少得可怜，等于说我用完了要么换个账号，要么就只能等一个礼拜。非常折磨人，也没办法接受。</p>
+<p>然后我开始研究国内的 IDE，试用了字节的 Trae 和腾讯的 CodeBuddy，我发现 Trae 模型好像停止更新了，不知道为啥没有最新的模型。而腾讯有最新的 GPT-5.4，用了一下感觉也挺好的，直接买了一个会员，结果没用半天又用完额度了……</p>
+<p>最后研究了一下拼车，结果在闲鱼上发现 Codex Business 会员（虽然卖家一般都会标注是 team 账号），只要七块钱一个月。搜了一下 Business 账号的限制，发现 Business 管理员只拥有审计员工账号操作日志的最高权限，聊天记录之类的按照官方的说法还是私密的，而且我只是写个人的开源项目，所以没啥顾虑，直接创建了一个新账号上车了，七块钱能用一个礼拜也算赚了。</p>
+<p>然后才发现之前过的都是什么苦日子，相对于 Google 来说，OpenAI 实在是太大方了。后面用到额度不够的时候，还发现一个账户可以直接加入多个 Business，额度不够直接切一个工作区就好了，甚至 session 也可以复用，比 Google 真是不知道高到哪里去了。</p>
+<p>使用 Codex 和 VSCode 官方插件，很快就完成了 <a target="_blank" rel="noopener" href="https://github.com/s1eke-labs/PlotMapAI">PlotMapAI</a> 75% 的功能。非常之快，但是为什么 v1.1.0 版本拖到两个礼拜才完成？因为剩下的 25% 真的是折磨。</p>
+<h2 id="重构"><a href="#重构" class="headerlink" title="重构"></a>重构</h2><p>折磨就是从细化细节开始的。只要开始细化细节，tokens 就不够用了。没错，就是这么恐怖。</p>
+<p>项目一开始，我提了需求和想法，然后根据 AI 的建议，技术选型选了 Flask + React + SQLite。结果刚开发完雏形，75% 的功能实现了，突然发现其实根本不需要后端，数据直接存 IndexedDB 就好了，而且所有的数据都在用户本地，更适合这种私有化部署的项目。纯前端项目的话，部署上也有很多可以白嫖的资源，客户端也可以直接支持 PWA，简直完美。</p>
+<p>但是出于节省 tokens 的想法，还是准备放弃把项目重构成纯前端的计划了。结果就在这时，小米发布了 mimo v2 pro。当然这并不是重点，重点是首周免费（现在已经延期成首两周免费了）。我直接试用了一下，感觉勉强也算 t1 档位，用来做一些简单的事情还是没问题的。所以直接用 Claude Opus 4.6 （没错，还是用 Antigravity 的额度）做了一个重构计划，然后用 kilocode + mimo v2 pro 来实施。最后成功<a target="_blank" rel="noopener" href="https://github.com/s1eke-labs/PlotMapAI/commit/75cdd1ee0a31da8caf5499c55fc9418e83f6a630">提交</a>。</p>
+<p>有了第一次重构，然后就开始一发不可收拾。不断新增需求，然后感觉很臃肿，开始拆分，再加需求，再拆分重构，反复循环。简单的部分直接用 mimo v2 pro ，复杂的、难得、需要有设计的地方用的 gpt 5.4。中间又经历了大规模清理和模块化：重命名了 API 实体，重构了 epub 解析模块、AI 分析模块等等。还迁移了一次架构，从扁平的 src&#x2F;services&#x2F; + src&#x2F;pages&#x2F; 结构迁移到了领域驱动设计。</p>
+<p>但是重构并不是万能的。重构的目的一般都是为了增强可维护性，提高可扩展性，提升可读性等等，重构手段一般是拆分、抽象等等。我一边开发，一边学习别的项目的架构。我在开发新功能的时候，发现书的排版布局确实是个大问题，有些地方改了很多遍都没有达到我想要的效果。于是我开始研究同类项目，找了一个 Readium 的 ts-toolkit 开始学习。我创了一个分支，参照 ts-toolkit 的思想重构整个阅读模块。结果一个 bug 一直改不好，有些效果甚至没有重构之前的效果好。因为本身也是为了解决这些问题进行重构的，所以我有点崩溃。我有了一个新想法，干脆按照新架构直接重写吧，这样可以直接抛弃很多技术债。</p>
+<p>于是我开始让 AI 分析当前项目的技术架构，还有一些技术细节，为重写做准备。结果 AI 的分析结果是：过度工程化，过度设计。</p>
+<p>我有点懵，原来不是架构越高级越好。我仔细看了分析报告，最终决定直接放弃这个分支，也不重写了，直接从 dev 分支延续之前的架构进行开发，目标转变成先做到能用。</p>
+<p>然后又开始吭哧吭哧地干，终于是完成了这个阶段，发布了 1.1.0 版本。</p>
+<h2 id="教训"><a href="#教训" class="headerlink" title="教训"></a>教训</h2><p>今天发布了 1.1.0 版本之后，我又回头看了下合并的 PR，发现除了新增功能外，还有一些是可以避免的，比如一些代码规范的问题、单文件代码超过 1000 行、膨胀的模块级全局单例、复杂度过高的 hook，这些至少可以通过 ESLint 配置更早暴露出来，还是吃了没有经验的亏，浪费了很多的时间和 tokens。</p>
+<p>又找了一些项目看了一下，后续 ESLint 这块准备直接用现成的 <a target="_blank" rel="noopener" href="https://github.com/alibaba/f2e-spec">阿里巴巴前端规范</a>。</p>
+<p>除了这些之外就是还得继续学习设计模式，不过这些也都不是最重要的，当前最重要的还是先找工作。没有真实的业务，还是很难想到要写什么东西，现在这些纯粹就是当练习的玩具了。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2026-03-29T18:32:52.012Z" itemprop="dateUpdated">2026-03-30 02:32:52</time>
+</span><br>
+
+
+        
+    </div>
+    
+    <footer>
+        <a href="https://blog.jugg.xyz">
+            <img src="/img/avatar.webp" alt="Sean Fang">
+            Sean Fang
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%BC%80%E5%8F%91/" rel="tag">开发</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.jugg.xyz/2026/03/29/musings/ai-development-experience/&title=《AI 开发体验》 — S1eke's Blog&pic=https://blog.jugg.xyz/img/avatar.webp" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.jugg.xyz/2026/03/29/musings/ai-development-experience/&title=《AI 开发体验》 — S1eke's Blog&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.jugg.xyz/2026/03/29/musings/ai-development-experience/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《AI 开发体验》 — S1eke's Blog&url=https://blog.jugg.xyz/2026/03/29/musings/ai-development-experience/&via=https://blog.jugg.xyz" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.jugg.xyz/2026/03/29/musings/ai-development-experience/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2026/03/03/ops/tailscale-self-hosted-derp-node-complete-guide-solve-high-latency-in-domestic-network/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Tailscale 自建 DERP 节点全教程：解决国内中继高延迟问题</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+    <section class="comments" id="comments">
+        <div id="giscus_thread"></div>
+        <script src="https://giscus.app/client.js"
+            data-repo="s1eke/s1eke.github.io"
+            data-repo-id="R_kgDOLe05uQ"
+            data-category="Announcements"
+            data-category-id="DIC_kwDOLe05uc4Cf1-1"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="light_protanopia"
+            data-lang="zh-CN"
+            data-loading="zh-CN"
+            crossorigin="anonymous"
+            async>
+        </script>
+    </section>
+    
+    
+    
+
+    
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>Sean Fang &copy; 2015 - 2026</span>
+            <span>
+                
+                Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.jugg.xyz/2026/03/29/musings/ai-development-experience/&title=《AI 开发体验》 — S1eke's Blog&pic=https://blog.jugg.xyz/img/avatar.webp" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.jugg.xyz/2026/03/29/musings/ai-development-experience/&title=《AI 开发体验》 — S1eke's Blog&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.jugg.xyz/2026/03/29/musings/ai-development-experience/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《AI 开发体验》 — S1eke's Blog&url=https://blog.jugg.xyz/2026/03/29/musings/ai-development-experience/&via=https://blog.jugg.xyz" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.jugg.xyz/2026/03/29/musings/ai-development-experience/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACtUlEQVR42u3aQW4jMQwEQP//01kg18B2Nymtfag5BcFkxFIAiSD5eMTPz+8z+/3fd5791d93/j6PGw8eHh7eKPTXn3v2m2c/57zXoSfxvNkCPDw8vGu89nBvL4DXQcw2Jbqo8PDw8D7K24TbBtri8fDw8L6f114AP8HTptR4eHh4n+UlxYjXyW4b4j6Gw7UWPDw8vO4ELhpg3/Dzxf4eHh4e3qKrvjmm80GBdsUiTjw8PLwLvH2bKim5zhpdbYEjqrXg4eHhrXntoFU+zNoWEWYXTPR/w8PDwzvK249YzYJreXkZ4umbeHh4eId4r9PZTUssh+VfrjcXDw8P7xqvTWE3pYT2+/kXnhZw8fDw8I7y9mXTImePh1A3xQg8PDy8/8PbjJbmB3pbXMjT/WJz8fDw8A7x9tdAuyn71LkoQ+Ph4eEd5SWvznrx+0GEpLz7piiMh4eHd413amSqbaG1z2qmDA8PD+8Crx1dbYsRm7Gt2UADHh4e3g1evswmxDxxb7c4KkDj4eHhXeC1C++LC206nm9H0eXDw8PDG/E2TanNEFU+lJCMWEU3Hh4eHt4FXnJjFKNOo6/NeI92ATw8PLwFrx26aptYsyGqtoRxbKYMDw8PL57nTJLgfIHZwNYsES+KEXh4eHhHee0BnS+cl3RnCfSbd/Dw8PAu8PK8+0YZYjauurqW8PDw8Na8UyOq+SUxGyDI8cUthIeHhzfiJYNW7XBA0tRvR2Dx8PDwvod3Krh2+TxBn20xHh4e3j3e5tjNG13taFdeHMHDw8P7FG9zGWyKBW1rbZag4+Hh4d3jzZLgWUK8X6vo7OHh4eF9MW91fJdRFW0zPDw8vI/yiuM4Hk2Ypd15nHh4eHj3ePtmf/61vETbpu91lw8PDw9vxNs3/mfjp8mb7aYc6O/h4eHhvYrqH1xEAyekAQwgAAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script>
+    var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+<script src="/js/main.js?v=1.8.0"></script>
+
+    
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+        <script src="/js/search.js?v=1.8.0" async></script>
+        
+
+            
+
+
+                
+                    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    
+
+                        
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = 'S1eke\'s Blog';
+            clearTimeout(titleTime);
+        } else {
+            document.title = 'S1eke\'s Blog';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+</body>
+</html>

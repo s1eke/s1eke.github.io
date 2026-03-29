@@ -14,7 +14,7 @@
     
     
     
-    <title>Archives: 2026/3 | S1eke&#39;s Blog | I&#39;m curious.</title>
+    <title>S1eke&#39;s Blog | I&#39;m curious.</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     
     <meta name="theme-color" content="#3F51B5">
@@ -23,7 +23,7 @@
     <meta name="keywords" content="">
     <meta property="og:type" content="website">
 <meta property="og:title" content="S1eke&#39;s Blog">
-<meta property="og:url" content="https://blog.jugg.xyz/archives/2026/03/index.html">
+<meta property="og:url" content="https://blog.jugg.xyz/page/3/index.html">
 <meta property="og:site_name" content="S1eke&#39;s Blog">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:author" content="Sean Fang">
@@ -69,7 +69,7 @@
               </a>
             </li>
         
-            <li class="waves-block waves-effect active">
+            <li class="waves-block waves-effect">
               <a href="/archives"  >
                 <i class="icon icon-lg icon-archives"></i>
                 归档
@@ -115,7 +115,7 @@
         <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
           <i class="icon icon-lg icon-navicon"></i>
         </a>
-        <div class="flex-col header-title ellipsis">Archives</div>
+        <div class="flex-col header-title ellipsis">S1eke&#39;s Blog</div>
         
         <div class="search-wrap" id="search-wrap">
             <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
@@ -134,11 +134,13 @@
         
     </div>
 </header>
-<header class="content-header archives-header">
+<header class="content-header index-header">
 
     <div class="container fade-scale">
-        <h1 class="title">Archives</h1>
+        <h1 class="title">S1eke&#39;s Blog</h1>
         <h5 class="subtitle">
+            
+                I'm curious.
             
         </h5>
     </div>
@@ -148,81 +150,72 @@
 
 </header>
 
-<div class="container body-wrap fade">
-    
+<div class="container body-wrap">
 
+    <ul class="post-list">
     
-            
-            <h3 class="archive-separator">三月, 2026</h3>
-            <div class="waterfall">
-    
+        <li class="post-list-item fade">
+            <article id="post-ops/Git-And-Hexo"
+  class="article-card article-type-post" itemprop="blogPost">
 
-        <div class="waterfall-item">
-  <article class="article-card archive-article">
     <div class="post-meta">
-      <time class="post-time" title="2026-03-29 23:30:27" datetime="2026-03-29T15:30:27.000Z"  itemprop="datePublished">2026-03-29</time>
+        <time class="post-time" title="2017-05-15 14:43:13" datetime="2017-05-15T06:43:13.000Z"  itemprop="datePublished">2017-05-15</time>
 
-      
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E8%BF%90%E7%BB%B4/">运维</a></li></ul>
+
 
 
     </div>
+
     
 
 
   
     <h3 class="post-title" itemprop="name">
-      <a class="post-title-link" href="/2026/03/29/musings/ai-development-experience/">AI 开发体验</a>
+      <a class="post-title-link" href="/2017/05/15/ops/Git-And-Hexo/">用git服务器和hexo搭建博客</a>
     </h3>
   
 
 
 
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        Git安装  git 安装非常简单，几乎所有的发行版都能在官方源找到，直接用包管理器下载即可。由于我的 vps 使用的 debian ，所以：
+#apt install git 
+
+Git使用
+Git仓库初始化
+ git 的初始化仓库命令是 git init，git 服务器一般都会带上 –bare 参数，这样不会在服务器上生成工作目录，不过由于我的需求是通过 git 同步 hexo 站点，所...
+    
+
+        <a href="/2017/05/15/ops/Git-And-Hexo/" class="post-more waves-effect waves-button">
+            阅读全文…
+        </a>
+    </div>
     
     <div class="post-footer">
         
-	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%BC%80%E5%8F%91/" rel="tag">开发</a></li></ul>
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Git/" rel="tag">Git</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Hexo/" rel="tag">Hexo</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nginx/" rel="tag">Nginx</a></li></ul>
 
     </div>
     
-  </article>
-</div>
+</article>
+
+        </li>
+    
+    </ul>
 
     
-
-        <div class="waterfall-item">
-  <article class="article-card archive-article">
-    <div class="post-meta">
-      <time class="post-time" title="2026-03-03 19:58:42" datetime="2026-03-03T11:58:42.000Z"  itemprop="datePublished">2026-03-03</time>
-
-      
-
-
+<nav id="page-nav">
+    <div class="inner">
+    <a class="extend prev" rel="prev" href="/page/2/">上一页</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span>
     </div>
-    
+</nav>
 
 
-  
-    <h3 class="post-title" itemprop="name">
-      <a class="post-title-link" href="/2026/03/03/ops/tailscale-self-hosted-derp-node-complete-guide-solve-high-latency-in-domestic-network/">Tailscale 自建 DERP 节点全教程：解决国内中继高延迟问题</a>
-    </h3>
-  
-
-
-
-    
-    <div class="post-footer">
-        
-	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/AI%E8%BE%85%E5%8A%A9/" rel="tag">AI辅助</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/DERP/" rel="tag">DERP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Tailscale/" rel="tag">Tailscale</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/WireGuard/" rel="tag">WireGuard</a></li></ul>
-
-    </div>
-    
-  </article>
-</div>
-
-    
-    </div>
-
-    
 </div>
 
         <footer class="footer">
@@ -264,7 +257,7 @@
 <div class="global-share" id="globalShare">
     <ul class="reset share-icons">
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.jugg.xyz/archives/2026/03/&title=S1eke's Blog&pic=https://blog.jugg.xyz/img/avatar.webp" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.jugg.xyz/page/3/&title=S1eke's Blog&pic=https://blog.jugg.xyz/img/avatar.webp" data-title="微博">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -274,22 +267,22 @@
         </a>
       </li>
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.jugg.xyz/archives/2026/03/&title=S1eke's Blog&source=" data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.jugg.xyz/page/3/&title=S1eke's Blog&source=" data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
       </li>
       <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.jugg.xyz/archives/2026/03/" data-title=" Facebook">
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.jugg.xyz/page/3/" data-title=" Facebook">
           <i class="icon icon-facebook"></i>
         </a>
       </li>
       <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=S1eke's Blog&url=https://blog.jugg.xyz/archives/2026/03/&via=https://blog.jugg.xyz" data-title=" Twitter">
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=S1eke's Blog&url=https://blog.jugg.xyz/page/3/&via=https://blog.jugg.xyz" data-title=" Twitter">
           <i class="icon icon-twitter"></i>
         </a>
       </li>
       <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.jugg.xyz/archives/2026/03/" data-title=" Google+">
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.jugg.xyz/page/3/" data-title=" Google+">
           <i class="icon icon-google-plus"></i>
         </a>
       </li>
@@ -300,7 +293,7 @@
 <div class="page-modal wx-share" id="wxShare">
     <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK4AAACuCAAAAACKZ2kyAAABxklEQVR42u3aS44CMQwFQO5/6Z4DMGmebRJAqqyQ6E4KFlb8eTzidS3W87er51d7PnYsXFzcMfe6XQl3hX5m3X9OTsHFxT3JvQ80+dZJmLvf/4UNFxf3i7mrd+/R91ciXFzc3+UmR/aSJVxc3G/jJgfc1yjmYe7NuRouLu6Am1cp933eUt/FxcVtca/iShonvXAWnY6Li3uEmweU/MKRpzHNc3FxcTdzk3Zpr0FSTWCi0Q1cXNwj3Emo6o1eTa4+uLi4Z7j5oFU+mNV7NyrE4OLiHuTmCcyE0rsM/RPIcHFxN3N715dqCOu1baIdcHFxN3CTMYjqk8lwRi/Y4eLinuRWhy3yEa4ed7knLi7uEW61CZqztic/uLi4B7nlwkS1Y1Mc1Cg3WXFxcd/ErR4wSXXmlyRcXNxPcavDWHmalP+8ZTjDxcX9ELfXIKkWQ6tXH1xc3DPcq7gmjdJeMwYXF/c8d8sER7FgmpRIyifi4uKOudVSRa8Ukl+bXvw1uLi4B7nVIYxJqTQPectAhouL+/Xc6lBF9ck3BzJcXNwN3GoLNr8wRUJcXNyD3ElxczJmkTdycHFxT3Lnfdp5SlMYzMLFxd3L/QPVxEjnngP/+QAAAABJRU5ErkJggg==" alt="微信分享二维码">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK4AAACuCAAAAACKZ2kyAAABwUlEQVR42u3aQW7DMAwEwPz/0ynQa2FnV7QVFxidgiSQx5eFRPL1itf7d/395mgd/fN8z8sWLi7umJs8+HzrBJTsn7w8Li7uTu55eCWPyTPnaP8kQHFxcZ/GTUKnDTVcXNz/zk2uK/khCRcX9/nc+eVk7apz410NFxd3wG0Lpnd8vrG+i4uLW3Lf5WqPJnmZNXo6Li7uFm5yLTlHtA3U5Ej0IeZwcXG3cyfXksmYRdK2wcXF3cNtoyRvlkyC7/BXXFzcLdy1Ecw8pJLIy8usuLi4e7ht+bI9DOUxFx2bcHFxv8otbk7lcOfaq9b9HFxc3DG3HcBqhzLnlyhcXNyd3EmjdC3Ukj0/FGhwcXFv5tZlyhI0H+DAxcV9Ajc59EzCqG2i4OLi7udeNR6Rh9dazOHi4u7kro1cLJY7y5YMLi7ud7lR2g1aJnkp9kNpBhcXdyO3PaysDWbN4w8XF3cPtw2Utixy1QB3/TK4uLhjbluqyAsleRN3cWYEFxf3Zu7aIGYyrl0MXSWJi4uL+zBuTmlLosXTcXFxH8ldK5G0hZLLggwXF3fAbTeaH48WxzpxcXG3cNuCaRtMk5jDxcXdzv0BVV38M0QDA/QAAAAASUVORK5CYII=" alt="微信分享二维码">
 </div>
 
 
