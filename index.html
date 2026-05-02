@@ -155,7 +155,7 @@
     <ul class="post-list">
     
         <li class="post-list-item fade">
-            <article id="post-frontend/localhost-vs-127-0-0-1-which-is-faster"
+            <article id="post-frontend/why-is-localhost-slower-than-127-0-0-1"
   class="article-card article-type-post" itemprop="blogPost">
 
     <div class="post-meta">
@@ -173,7 +173,7 @@
 
   
     <h3 class="post-title" itemprop="name">
-      <a class="post-title-link" href="/2026/05/02/frontend/localhost-vs-127-0-0-1-which-is-faster/">Localhost 快还是 127.0.0.1 快？</a>
+      <a class="post-title-link" href="/2026/05/02/frontend/why-is-localhost-slower-than-127-0-0-1/">Localhost 为什么比 127.0.0.1 慢？</a>
     </h3>
   
 
@@ -183,11 +183,11 @@
     <div class="post-content" id="post-content" itemprop="postContent">
 
     
-        先说结论：localhost 和 127.0.0.1 本身没有谁天然更快。正常情况下，localhost 多出来的名字解析只是在本机 resolver 或 hosts 文件里走一圈，通常只是微秒级差异，几乎可以忽略。
-真正容易拉开差距的是另一件事：localhost 不一定只指向 127.0.0.1，它还可能优先解析到 IPv6 的 ::1。如果你的服务只监听了 IPv4，客户端先尝试连 :...
+        先说结论：localhost 和 127.0.0.1 本身没有谁天然更快。正常情况下，localhost 多出来的主机名解析，只是在本机 resolver 或 hosts 文件里查一下 localhost 对应的 IP 地址，通常只是微秒级差异，几乎可以忽略。
+真正容易拉开差距的是另一件事：localhost 不一定只指向 127.0.0.1，它还可能优先解析到 IPv6 的 ::1。如果你...
     
 
-        <a href="/2026/05/02/frontend/localhost-vs-127-0-0-1-which-is-faster/" class="post-more waves-effect waves-button">
+        <a href="/2026/05/02/frontend/why-is-localhost-slower-than-127-0-0-1/" class="post-more waves-effect waves-button">
             阅读全文…
         </a>
     </div>

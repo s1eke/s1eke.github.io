@@ -14,32 +14,32 @@
     
     
     
-    <title>Localhost 快还是 127.0.0.1 快？ | S1eke&#39;s Blog | I&#39;m curious.</title>
+    <title>Localhost 为什么比 127.0.0.1 慢？ | S1eke&#39;s Blog | I&#39;m curious.</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     
     <meta name="theme-color" content="#3F51B5">
     
     
     <meta name="keywords" content="Node.js,PWA,DNS">
-    <meta name="description" content="先说结论：localhost 和 127.0.0.1 本身没有谁天然更快。正常情况下，localhost 多出来的名字解析只是在本机 resolver 或 hosts 文件里走一圈，通常只是微秒级差异，几乎可以忽略。 真正容易拉开差距的是另一件事：localhost 不一定只指向 127.0.0.1，它还可能优先解析到 IPv6 的 ::1。如果你的服务只监听了 IPv4，客户端先尝试连 ::1，">
+    <meta name="description" content="先说结论：localhost 和 127.0.0.1 本身没有谁天然更快。正常情况下，localhost 多出来的主机名解析，只是在本机 resolver 或 hosts 文件里查一下 localhost 对应的 IP 地址，通常只是微秒级差异，几乎可以忽略。 真正容易拉开差距的是另一件事：localhost 不一定只指向 127.0.0.1，它还可能优先解析到 IPv6 的 ::1。如果你的服务">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Localhost 快还是 127.0.0.1 快？">
-<meta property="og:url" content="https://blog.jugg.xyz/2026/05/02/frontend/localhost-vs-127-0-0-1-which-is-faster/index.html">
+<meta property="og:title" content="Localhost 为什么比 127.0.0.1 慢？">
+<meta property="og:url" content="https://blog.jugg.xyz/2026/05/02/frontend/why-is-localhost-slower-than-127-0-0-1/index.html">
 <meta property="og:site_name" content="S1eke&#39;s Blog">
-<meta property="og:description" content="先说结论：localhost 和 127.0.0.1 本身没有谁天然更快。正常情况下，localhost 多出来的名字解析只是在本机 resolver 或 hosts 文件里走一圈，通常只是微秒级差异，几乎可以忽略。 真正容易拉开差距的是另一件事：localhost 不一定只指向 127.0.0.1，它还可能优先解析到 IPv6 的 ::1。如果你的服务只监听了 IPv4，客户端先尝试连 ::1，">
+<meta property="og:description" content="先说结论：localhost 和 127.0.0.1 本身没有谁天然更快。正常情况下，localhost 多出来的主机名解析，只是在本机 resolver 或 hosts 文件里查一下 localhost 对应的 IP 地址，通常只是微秒级差异，几乎可以忽略。 真正容易拉开差距的是另一件事：localhost 不一定只指向 127.0.0.1，它还可能优先解析到 IPv6 的 ::1。如果你的服务">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://blog.jugg.xyz/img/localhost-vs-127-0-0-1-which-is-faster/127server.png">
-<meta property="og:image" content="https://blog.jugg.xyz/img/localhost-vs-127-0-0-1-which-is-faster/localhostserver.png">
-<meta property="og:image" content="https://blog.jugg.xyz/img/localhost-vs-127-0-0-1-which-is-faster/TTFB1.png">
-<meta property="og:image" content="https://blog.jugg.xyz/img/localhost-vs-127-0-0-1-which-is-faster/TTFB2.png">
+<meta property="og:image" content="https://blog.jugg.xyz/img/why-is-localhost-slower-than-127-0-0-1/127server.png">
+<meta property="og:image" content="https://blog.jugg.xyz/img/why-is-localhost-slower-than-127-0-0-1/localhostserver.png">
+<meta property="og:image" content="https://blog.jugg.xyz/img/why-is-localhost-slower-than-127-0-0-1/TTFB1.png">
+<meta property="og:image" content="https://blog.jugg.xyz/img/why-is-localhost-slower-than-127-0-0-1/TTFB2.png">
 <meta property="article:published_time" content="2026-05-02T09:50:10.000Z">
-<meta property="article:modified_time" content="2026-05-02T10:53:44.003Z">
+<meta property="article:modified_time" content="2026-05-02T11:24:14.332Z">
 <meta property="article:author" content="Sean Fang">
 <meta property="article:tag" content="DNS">
 <meta property="article:tag" content="Node.js">
 <meta property="article:tag" content="PWA">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://blog.jugg.xyz/img/localhost-vs-127-0-0-1-which-is-faster/127server.png">
+<meta name="twitter:image" content="https://blog.jugg.xyz/img/why-is-localhost-slower-than-127-0-0-1/127server.png">
     
         <link rel="alternate" type="application/atom+xml" title="S1eke&#39;s Blog" href="/atom.xml">
     
@@ -127,7 +127,7 @@
         <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
           <i class="icon icon-lg icon-navicon"></i>
         </a>
-        <div class="flex-col header-title ellipsis">Localhost 快还是 127.0.0.1 快？</div>
+        <div class="flex-col header-title ellipsis">Localhost 为什么比 127.0.0.1 慢？</div>
         
         <div class="search-wrap" id="search-wrap">
             <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
@@ -149,7 +149,7 @@
 <header class="content-header post-header">
 
     <div class="container fade-scale">
-        <h1 class="title">Localhost 快还是 127.0.0.1 快？</h1>
+        <h1 class="title">Localhost 为什么比 127.0.0.1 慢？</h1>
         <h5 class="subtitle">
             
                 <time datetime="2026-05-02T09:50:10.000Z" itemprop="datePublished" class="page-time">
@@ -179,11 +179,11 @@
     </aside>
 
 
-<article id="post-frontend/localhost-vs-127-0-0-1-which-is-faster"
+<article id="post-frontend/why-is-localhost-slower-than-127-0-0-1"
   class="post-article article-type-post fade" itemprop="blogPost">
 
     <div class="post-card">
-        <h1 class="post-card-title">Localhost 快还是 127.0.0.1 快？</h1>
+        <h1 class="post-card-title">Localhost 为什么比 127.0.0.1 慢？</h1>
         <div class="post-meta">
             <time class="post-time" title="2026-05-02 17:50:10" datetime="2026-05-02T09:50:10.000Z"  itemprop="datePublished">2026-05-02</time>
 
@@ -200,13 +200,13 @@
 
         </div>
         <div class="post-content" id="post-content" itemprop="postContent">
-            <p>先说结论：<code>localhost</code> 和 <code>127.0.0.1</code> 本身没有谁天然更快。正常情况下，<code>localhost</code> 多出来的名字解析只是在本机 resolver 或 hosts 文件里走一圈，通常只是微秒级差异，几乎可以忽略。</p>
+            <p>先说结论：<code>localhost</code> 和 <code>127.0.0.1</code> 本身没有谁天然更快。正常情况下，<code>localhost</code> 多出来的主机名解析，只是在本机 resolver 或 hosts 文件里查一下 <code>localhost</code> 对应的 IP 地址，通常只是微秒级差异，几乎可以忽略。</p>
 <p>真正容易拉开差距的是另一件事：<code>localhost</code> 不一定只指向 <code>127.0.0.1</code>，它还可能优先解析到 IPv6 的 <code>::1</code>。如果你的服务只监听了 IPv4，客户端先尝试连 <code>::1</code>，再回退到 <code>127.0.0.1</code>，这一步就可能带来 200ms 到 300ms 级别的连接延迟。</p>
 <h2 id="现象"><a href="#现象" class="headerlink" title="现象"></a>现象</h2><p>先看一个本地开发服务的例子。通过 <code>127.0.0.1</code> 访问：</p>
 <figure class="image-bubble">
                 <div class="img-lightbox">
                     <div class="overlay"></div>
-                    <img src="/img/localhost-vs-127-0-0-1-which-is-faster/127server.png" alt="通过 127.0.0.1 访问本地服务" title="">
+                    <img src="/img/why-is-localhost-slower-than-127-0-0-1/127server.png" alt="通过 127.0.0.1 访问本地服务" title="">
                 </div>
                 <div class="image-caption">通过 127.0.0.1 访问本地服务</div>
             </figure>
@@ -215,7 +215,7 @@
 <figure class="image-bubble">
                 <div class="img-lightbox">
                     <div class="overlay"></div>
-                    <img src="/img/localhost-vs-127-0-0-1-which-is-faster/localhostserver.png" alt="通过 localhost 访问本地服务" title="">
+                    <img src="/img/why-is-localhost-slower-than-127-0-0-1/localhostserver.png" alt="通过 localhost 访问本地服务" title="">
                 </div>
                 <div class="image-caption">通过 localhost 访问本地服务</div>
             </figure>
@@ -225,7 +225,7 @@
 <figure class="image-bubble">
                 <div class="img-lightbox">
                     <div class="overlay"></div>
-                    <img src="/img/localhost-vs-127-0-0-1-which-is-faster/TTFB1.png" alt="localhost 请求的连接耗时" title="">
+                    <img src="/img/why-is-localhost-slower-than-127-0-0-1/TTFB1.png" alt="localhost 请求的连接耗时" title="">
                 </div>
                 <div class="image-caption">localhost 请求的连接耗时</div>
             </figure>
@@ -234,7 +234,7 @@
 <figure class="image-bubble">
                 <div class="img-lightbox">
                     <div class="overlay"></div>
-                    <img src="/img/localhost-vs-127-0-0-1-which-is-faster/TTFB2.png" alt="127.0.0.1 请求的连接耗时" title="">
+                    <img src="/img/why-is-localhost-slower-than-127-0-0-1/TTFB2.png" alt="127.0.0.1 请求的连接耗时" title="">
                 </div>
                 <div class="image-caption">127.0.0.1 请求的连接耗时</div>
             </figure>
@@ -277,10 +277,10 @@
 <p>如果 <code>localhost</code> 明显慢，而 <code>curl -4</code> 恢复正常，基本就可以确认是 IPv6 优先和 IPv4 回退带来的连接成本。</p>
 <p>参考：</p>
 <ul>
-<li><a target="_blank" rel="noopener" href="https://everything.curl.dev/usingcurl/connections/happy.html">everything curl: Happy Eyeballs</a></li>
-<li><a target="_blank" rel="noopener" href="https://chromium.googlesource.com/chromium/src/+/refs/heads/main/net/socket/transport_connect_job.h#124">Chromium: <code>kIPv6FallbackTime</code></a></li>
-<li><a target="_blank" rel="noopener" href="https://nodejs.org/api/http.html#new-agentoptions">Node.js HTTP Agent</a></li>
-<li><a target="_blank" rel="noopener" href="https://vite.dev/config/server-options.html#server-proxy">Vite server.proxy</a></li>
+<li>everything curl: Happy Eyeballs: <a target="_blank" rel="noopener" href="https://everything.curl.dev/usingcurl/connections/happy.html">https://everything.curl.dev/usingcurl/connections/happy.html</a></li>
+<li>Chromium <code>kIPv6FallbackTime</code>: <a target="_blank" rel="noopener" href="https://chromium.googlesource.com/chromium/src/+/refs/heads/main/net/socket/transport_connect_job.h#124">https://chromium.googlesource.com/chromium/src/+/refs/heads/main/net/socket/transport_connect_job.h#124</a></li>
+<li>Node.js HTTP Agent: <a target="_blank" rel="noopener" href="https://nodejs.org/api/http.html#new-agentoptions">https://nodejs.org/api/http.html#new-agentoptions</a></li>
+<li>Vite server.proxy: <a target="_blank" rel="noopener" href="https://vite.dev/config/server-options.html#server-proxy">https://vite.dev/config/server-options.html#server-proxy</a></li>
 </ul>
 
         </div>
@@ -290,7 +290,7 @@
     <div class="content">
         
 <span class="post-time">
-    最后更新时间：<time datetime="2026-05-02T10:53:44.003Z" itemprop="dateUpdated">2026-05-02 18:53:44</time>
+    最后更新时间：<time datetime="2026-05-02T11:24:14.332Z" itemprop="dateUpdated">2026-05-02 19:24:14</time>
 </span><br>
 
 
@@ -320,7 +320,7 @@
 <div class="page-share" id="pageShare">
     <ul class="reset share-icons">
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.jugg.xyz/2026/05/02/frontend/localhost-vs-127-0-0-1-which-is-faster/&title=《Localhost 快还是 127.0.0.1 快？》 — S1eke's Blog&pic=https://blog.jugg.xyz/img/avatar.webp" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.jugg.xyz/2026/05/02/frontend/why-is-localhost-slower-than-127-0-0-1/&title=《Localhost 为什么比 127.0.0.1 慢？》 — S1eke's Blog&pic=https://blog.jugg.xyz/img/avatar.webp" data-title="微博">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -330,22 +330,22 @@
         </a>
       </li>
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.jugg.xyz/2026/05/02/frontend/localhost-vs-127-0-0-1-which-is-faster/&title=《Localhost 快还是 127.0.0.1 快？》 — S1eke's Blog&source=" data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.jugg.xyz/2026/05/02/frontend/why-is-localhost-slower-than-127-0-0-1/&title=《Localhost 为什么比 127.0.0.1 慢？》 — S1eke's Blog&source=" data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
       </li>
       <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.jugg.xyz/2026/05/02/frontend/localhost-vs-127-0-0-1-which-is-faster/" data-title=" Facebook">
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.jugg.xyz/2026/05/02/frontend/why-is-localhost-slower-than-127-0-0-1/" data-title=" Facebook">
           <i class="icon icon-facebook"></i>
         </a>
       </li>
       <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Localhost 快还是 127.0.0.1 快？》 — S1eke's Blog&url=https://blog.jugg.xyz/2026/05/02/frontend/localhost-vs-127-0-0-1-which-is-faster/&via=https://blog.jugg.xyz" data-title=" Twitter">
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Localhost 为什么比 127.0.0.1 慢？》 — S1eke's Blog&url=https://blog.jugg.xyz/2026/05/02/frontend/why-is-localhost-slower-than-127-0-0-1/&via=https://blog.jugg.xyz" data-title=" Twitter">
           <i class="icon icon-twitter"></i>
         </a>
       </li>
       <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.jugg.xyz/2026/05/02/frontend/localhost-vs-127-0-0-1-which-is-faster/" data-title=" Google+">
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.jugg.xyz/2026/05/02/frontend/why-is-localhost-slower-than-127-0-0-1/" data-title=" Google+">
           <i class="icon icon-google-plus"></i>
         </a>
       </li>
@@ -470,7 +470,7 @@
 <div class="global-share" id="globalShare">
     <ul class="reset share-icons">
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.jugg.xyz/2026/05/02/frontend/localhost-vs-127-0-0-1-which-is-faster/&title=《Localhost 快还是 127.0.0.1 快？》 — S1eke's Blog&pic=https://blog.jugg.xyz/img/avatar.webp" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.jugg.xyz/2026/05/02/frontend/why-is-localhost-slower-than-127-0-0-1/&title=《Localhost 为什么比 127.0.0.1 慢？》 — S1eke's Blog&pic=https://blog.jugg.xyz/img/avatar.webp" data-title="微博">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -480,22 +480,22 @@
         </a>
       </li>
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.jugg.xyz/2026/05/02/frontend/localhost-vs-127-0-0-1-which-is-faster/&title=《Localhost 快还是 127.0.0.1 快？》 — S1eke's Blog&source=" data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.jugg.xyz/2026/05/02/frontend/why-is-localhost-slower-than-127-0-0-1/&title=《Localhost 为什么比 127.0.0.1 慢？》 — S1eke's Blog&source=" data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
       </li>
       <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.jugg.xyz/2026/05/02/frontend/localhost-vs-127-0-0-1-which-is-faster/" data-title=" Facebook">
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.jugg.xyz/2026/05/02/frontend/why-is-localhost-slower-than-127-0-0-1/" data-title=" Facebook">
           <i class="icon icon-facebook"></i>
         </a>
       </li>
       <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Localhost 快还是 127.0.0.1 快？》 — S1eke's Blog&url=https://blog.jugg.xyz/2026/05/02/frontend/localhost-vs-127-0-0-1-which-is-faster/&via=https://blog.jugg.xyz" data-title=" Twitter">
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Localhost 为什么比 127.0.0.1 慢？》 — S1eke's Blog&url=https://blog.jugg.xyz/2026/05/02/frontend/why-is-localhost-slower-than-127-0-0-1/&via=https://blog.jugg.xyz" data-title=" Twitter">
           <i class="icon icon-twitter"></i>
         </a>
       </li>
       <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.jugg.xyz/2026/05/02/frontend/localhost-vs-127-0-0-1-which-is-faster/" data-title=" Google+">
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.jugg.xyz/2026/05/02/frontend/why-is-localhost-slower-than-127-0-0-1/" data-title=" Google+">
           <i class="icon icon-google-plus"></i>
         </a>
       </li>
@@ -506,7 +506,7 @@
 <div class="page-modal wx-share" id="wxShare">
     <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACt0lEQVR42u3aQW7DMAwEwP7/0+25SO3sipKbw+QUuK6tSQCLWfLrK359x6/X86+ucHX91+Ov7ze/8PDw8LYu/erS98u9v0ty/J6XrBkPDw/vNK+99D37/jrJkfa+l8fx8PDwPoA3eazfbyFrbDw8PLxP5q2Bk6Ahvw4eHh7e5/DaWDYJJvLyeq2k3py14OHh4cW8vIv0Oe+P9Pfw8PDwtg4EzB/W+VjA5Pq/7oWHh4d3gLc2OpAHsvkV5lHF5f/i4eHhHeC1dWke2rbRRn6vyUeDh4eHN+GtLTpvgLVLXGuqXX5XeHh4eAd4k+QzL7V3DRnMC308PDy8vbz80b/WMEvY+UaFh4eH91+8tu20VnZPQoe1aPhXGIGHh4d3gLe2JbRtsLZMb0ev/jiOh4eHd4CXnDRp6rfhbFvK11Q8PDy8MS9vICWt+gm7bYlFXwAeHh7eMV6+6GSfaZv6eSCS3wsPDw/vHG++6HYz2HW8WA8eHh7eAV7e1krChWRB7fnbSnA8PDy8MW/y438NPC/ZkzMvfzHg4eHhbeK1o1Ftmz8pu9e2mTd3xMPDwzvGa4cG8tC2LY4nwwRvUhY8PDy8Tbx5FJuXv2sRQz6gcPlXPDw8vAO8NozYVVjPhwOSjwwPDw/vBK8NC/Iy+snBrKgNhoeHh/cIr21HteVysXeVpTweHh7eM7x2NCofMlh73CfrOVL74+Hh4ZWLaJthaxvDZBuou3x4eHh4m3jf5Stvj7UfX75hFMMHeHh4eAd47QM3Hxhda33Ny+4ahoeHh7fEmwyV5iOtbSA7L9bx8PDwTvPyeDcvZ9eGEtoY4k10goeHh/cBvLURq7wxtjb4VU9G4OHh4T3Ia1tWa3FwGy7j4eHhPc/Lw4ikyJ6X5nmM+2azwcPDwzvAW5zVKmOFZOmTgBgPDw/vEd4P6WBF8l+i6hgAAAAASUVORK5CYII=" alt="微信分享二维码">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACtElEQVR42u3awU7DMBAEUP7/p0HiCgkzazutxMupgsbx8yHejvfjI74+v6/k88/rapyff7///tW9Gy48PDy80dTvJ5c8uB3hCpaPliwoHh4e3jleuxm01/0TLyd3uwT3c8bDw8N7B14+rftXebs95OU1Hh4e3rvx2lf5bOptCIKHh4f3Kl7+4z+5d1dZ/GjWgoeHhxfz9h6APfP5Zed7eHh4/573uenaNdrKwdgvo+Hh4eEd4CWxQrJV5P+dlcWzIAMPDw/vNC9vrmoPtGYNBEkkEYHx8PDwtvLuh5vFE+sTbecQFdN4eHh4m3htEZzHBO02kxf3yQaDh4eH9wxvW5NTefw/K5rbEh8PDw9vF699Ebdxak6adQL8MU88PDy8A7x2onlh3RbB7Th1GY2Hh4d3gLfhp34ZrbYF9HC2eHh4eFt5yTFVHlK0E0pK+ZXwAg8PD+9VvHwJVjabttkrAuPh4eEd4O1qGmiD11n76TCkwMPDw3uEl2wS7feL1tI4j402Kjw8PLytvLZQbkOBlUVsQ+Q/fjHg4eHhHeDlm8Hsmzl75Sl4eHh4p3l72wVmRXAeXrTj4+Hh4Z3g5U1Rs0ChfbnPDtsuI2A8PDy8w7z65lGzVH7ENdtILjcGPDw8vE28WRtTO638NKrdqOowAg8PD28Tb/3Vv94a1QYQwxYEPDw8vE28lSaqlcWatQ7UjQV4eHh4x3htsZsX0LMguF1EPDw8vGd4K5OYHe238cFKOIKHh4d3gjdrq8qpLbtlzI7x8PDw8NZ57bF93ji1EmfMxv9lyfDw8PCO8VYK4jxUbbeN2aEdHh4e3rvxll7T8bRmTy9SXjw8PLxHeCupxuzQq12+yzACDw8P7wAvCSPuA9zZCz1/bt6YhYeHh3ea1x6ArTS8Jne1Ue9S0wAeHh5ex/sCEfbaT7y+3KkAAAAASUVORK5CYII=" alt="微信分享二维码">
 </div>
 
 
