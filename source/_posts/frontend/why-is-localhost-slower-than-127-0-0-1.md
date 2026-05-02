@@ -1,5 +1,5 @@
 ---
-title: Localhost 快还是 127.0.0.1 快？
+title: Localhost 为什么比 127.0.0.1 慢？
 date: 2026-05-02 17:50:10
 tags:
     - Node.js
@@ -9,7 +9,7 @@ categories:
   - [前端]
 ---
 
-先说结论：`localhost` 和 `127.0.0.1` 本身没有谁天然更快。正常情况下，`localhost` 多出来的名字解析只是在本机 resolver 或 hosts 文件里走一圈，通常只是微秒级差异，几乎可以忽略。
+先说结论：`localhost` 和 `127.0.0.1` 本身没有谁天然更快。正常情况下，`localhost` 多出来的主机名解析，只是在本机 resolver 或 hosts 文件里查一下 `localhost` 对应的 IP 地址，通常只是微秒级差异，几乎可以忽略。
 
 真正容易拉开差距的是另一件事：`localhost` 不一定只指向 `127.0.0.1`，它还可能优先解析到 IPv6 的 `::1`。如果你的服务只监听了 IPv4，客户端先尝试连 `::1`，再回退到 `127.0.0.1`，这一步就可能带来 200ms 到 300ms 级别的连接延迟。
 
@@ -17,21 +17,21 @@ categories:
 
 先看一个本地开发服务的例子。通过 `127.0.0.1` 访问：
 
-![通过 127.0.0.1 访问本地服务](/img/localhost-vs-127-0-0-1-which-is-faster/127server.png)
+![通过 127.0.0.1 访问本地服务](/img/why-is-localhost-slower-than-127-0-0-1/127server.png)
 
 再通过 `localhost` 访问同一个服务：
 
-![通过 localhost 访问本地服务](/img/localhost-vs-127-0-0-1-which-is-faster/localhostserver.png)
+![通过 localhost 访问本地服务](/img/why-is-localhost-slower-than-127-0-0-1/localhostserver.png)
 
 同一个页面，同样 12 次请求，传输数据量也差不多，一个耗时 214ms，一个耗时 691ms，几乎差了三倍。
 
 这个页面的请求不多，所以瀑布图里很容易看到有几个请求明显更慢。点开其中一个请求，问题集中在连接阶段：
 
-![localhost 请求的连接耗时](/img/localhost-vs-127-0-0-1-which-is-faster/TTFB1.png)
+![localhost 请求的连接耗时](/img/why-is-localhost-slower-than-127-0-0-1/TTFB1.png)
 
 再放一张相同请求在另一个访问方式下的对比：
 
-![127.0.0.1 请求的连接耗时](/img/localhost-vs-127-0-0-1-which-is-faster/TTFB2.png)
+![127.0.0.1 请求的连接耗时](/img/why-is-localhost-slower-than-127-0-0-1/TTFB2.png)
 
 这里需要注意一个细节：这不是传统意义上的“后端处理慢”，也不该简单归因成“DNS 查询慢”。DevTools 里看到的慢点更接近 `Initial connection`，也就是建立 TCP 连接时的地址选择和回退成本。
 
@@ -146,7 +146,7 @@ curl -6 -o /dev/null -s -w 'connect=%{time_connect} total=%{time_total}\n' http:
 
 参考：
 
-- [everything curl: Happy Eyeballs](https://everything.curl.dev/usingcurl/connections/happy.html)
-- [Chromium: `kIPv6FallbackTime`](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/net/socket/transport_connect_job.h#124)
-- [Node.js HTTP Agent](https://nodejs.org/api/http.html#new-agentoptions)
-- [Vite server.proxy](https://vite.dev/config/server-options.html#server-proxy)
+- everything curl: Happy Eyeballs: [https://everything.curl.dev/usingcurl/connections/happy.html](https://everything.curl.dev/usingcurl/connections/happy.html)
+- Chromium `kIPv6FallbackTime`: [https://chromium.googlesource.com/chromium/src/+/refs/heads/main/net/socket/transport_connect_job.h#124](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/net/socket/transport_connect_job.h#124)
+- Node.js HTTP Agent: [https://nodejs.org/api/http.html#new-agentoptions](https://nodejs.org/api/http.html#new-agentoptions)
+- Vite server.proxy: [https://vite.dev/config/server-options.html#server-proxy](https://vite.dev/config/server-options.html#server-proxy)
